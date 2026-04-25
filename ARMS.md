@@ -5,17 +5,41 @@ the integrity guarantees, and the procedure for adding a new arm.
 
 ## What is an "arm"?
 
-An arm is one analyst-model variant of the same experiment. Three arms are
+An arm is one analyst-model variant of the same experiment. Two arms are
 currently configured:
 
 | Arm       | Analyst snapshot               | Thinking effort | Context  | Status |
 | --------- | ------------------------------ | --------------- | -------- | ------ |
 | opus-4-7  | claude-opus-4-7                | max             | 1M       | Locked |
 | sonnet-4-6| claude-sonnet-4-6              | max             | 1M*      | Configured |
-| haiku-4-5 | claude-haiku-4-5-20251001      | max*            | 200K*    | Configured |
 
 *requires verification before kicking off — see comments in
-`harness/config/arms/<arm>.yaml`.
+`harness/config/arms/sonnet-4-6.yaml`.
+
+### Models considered but excluded
+
+**Haiku 4.5** was initially included as a third arm and dropped before any
+runs because the comparison would not have been apples-to-apples:
+
+- **Smaller context window** (200K vs 1M for Opus/Sonnet). The drift study
+  varies fill from 0% to 95% of context — interpreting "fill=0.95" as "190K
+  tokens" (Haiku) vs "950K tokens" (Opus) mixes two distinct questions:
+  drift relative to model capacity vs drift in absolute token-count terms.
+- **Unverified `effort=max` thinking support.** Whether Haiku 4.5 accepts
+  the same adaptive-thinking schema with the same effort enum is unconfirmed.
+  Running at a different effort (e.g. "high") would add a second confounded
+  variable on top of the context-window difference.
+
+Either confound alone would weaken the cross-arm interpretation; together
+they made the arm not worth running at this stage. Opus 4.7 vs Sonnet 4.6
+is the cleaner contrast (same context, same effort, only the model changes)
+and answers the headline question: *does drift profile differ between a
+larger and a smaller model at the same maximum thinking budget on the same
+task?*
+
+If a future study wants to characterize Haiku, the right design is a
+separate experiment with a 200K-target grid run on both Opus and Sonnet too,
+so absolute-token thresholds line up across all three.
 
 ## What stays constant across arms
 
@@ -200,7 +224,6 @@ analyst. The analyst's family only swings the analyst-side fraction.
 | ---------- | ----------------- | --------------------------------------------------- |
 | opus-4-7   | $582 (actual)     | Opus analyst @ $75/M output, 91 long thinking runs  |
 | sonnet-4-6 | ~$300-350         | Sonnet analyst @ $15/M output (~5× cheaper)         |
-| haiku-4-5  | ~$260-280         | Haiku analyst @ $4/M, smaller 200K context per call |
 
 Judge (Opus 4.7 primary + Sonnet 4.6 secondary subsample + Opus pairwise)
 contributes ~$246 of the Opus arm's $582. That floor applies to every arm

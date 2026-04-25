@@ -4,8 +4,9 @@ Executes the experiment described in `../DESIGN.md` for any single analyst
 arm. Produces a JSONL dump of **91 analyst runs** (13 cells × 7 reps) plus
 extractor and judge outputs, written under `../arms/<arm>/data/`.
 
-The Opus 4.7 arm is locked. Sonnet 4.6 and Haiku 4.5 arms are configured
-but not yet executed — see `../ARMS.md` for the cross-arm integrity model.
+The Opus 4.7 arm is locked. Sonnet 4.6 arm is configured but not yet
+executed — see `../ARMS.md` for the cross-arm integrity model and for why
+Haiku 4.5 was considered but excluded.
 
 ## Layout
 

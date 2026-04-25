@@ -81,5 +81,5 @@
 
   "locked_at": "2026-04-25T00:00:00Z",
   "locked_by": "Victor Zhang <victor.zhang.eu@gmail.com>",
-  "lock_notes": "Original Opus 4.7 arm completed 2026-04-25 ($582.33, 91/91/91 runs). Multi-arm refactor lands this lock file. Sonnet 4.6 and Haiku 4.5 arms configured but not yet executed."
+  "lock_notes": "Original Opus 4.7 arm completed 2026-04-25 ($582.33, 91/91/91 runs). Multi-arm refactor lands this lock file. Sonnet 4.6 arm configured but not yet executed. Haiku 4.5 was considered but excluded — its 200K context window and unverified effort=max thinking support would force two confounded changes at once relative to Opus/Sonnet at 1M; see ARMS.md."
 }

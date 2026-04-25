@@ -4,8 +4,8 @@
 # everything else here applies unless the arm explicitly overrides it.
 #
 # Pre-registration hash is over DESIGN.md + PROMPTS.md + RUBRIC.md and is
-# IDENTICAL across arms — the methodology does not change between Opus 4.7,
-# Sonnet 4.6, and Haiku 4.5 runs. Only the analyst snapshot varies.
+# IDENTICAL across arms — the methodology does not change between the
+# Opus 4.7 and Sonnet 4.6 runs. Only the analyst snapshot varies.
 
 experiment:
   name: "opus-4.7-reasoning-drift"
@@ -46,8 +46,10 @@ models:
 
 # ------------------------------------------------------------------
 # Design grid — IDENTICAL across arms so cells line up cell-by-cell.
-# Per-arm yaml may override `tokens.total_context_target` if the analyst's
-# context window is smaller (e.g., Haiku 4.5 at 200K instead of 1M).
+# Both currently-configured arms (Opus 4.7, Sonnet 4.6) have 1M context so
+# total_context_target is shared. Smaller-context analyst arms would need
+# to override tokens.total_context_target — see ARMS.md for why Haiku 4.5
+# was excluded rather than added with a rescaled grid.
 # ------------------------------------------------------------------
 design:
   fill_levels: [0.00, 0.25, 0.50, 0.75, 0.95]

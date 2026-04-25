@@ -1,0 +1,85 @@
+{
+  "$schema_version": "1.0",
+  "experiment_name": "opus-4.7-reasoning-drift",
+  "methodology_files": ["DESIGN.md", "PROMPTS.md", "RUBRIC.md"],
+  "methodology_hash": "61b2d30f0c741bd96f24159fedc814276df565de317f780e117a3c7e32100419",
+  "methodology_hash_recipe": "sha256 of DESIGN.md + PROMPTS.md + RUBRIC.md concatenated as raw bytes (no separator)",
+  "methodology_hash_reproduce": "python3 -c \"import hashlib; print(hashlib.sha256(b''.join(open(f, 'rb').read() for f in ['DESIGN.md','PROMPTS.md','RUBRIC.md'])).hexdigest())\"",
+
+  "materials_lock_path": "materials/materials.lock.json",
+  "materials_lock_hash": "c13b5514279c9d8dbc5118ec9b3b1325a0cff56c4fb1cee8d66992a98cd25199",
+  "materials_lock_hash_recipe": "sha256 of materials/materials.lock.json file bytes",
+  "materials_corpus_summary": {
+    "target_company": "MSFT",
+    "target_files": ["target/MSFT/10k.txt", "target/MSFT/earnings_call.txt"],
+    "ground_truth_file": "ground_truth/MSFT.json",
+    "questions_file": "questions/MSFT.json",
+    "noise_pool": "noise/peer_materials/MSFT/{aapl,amzn,crm,googl,meta,nvda,orcl}_10k_fy2025-2026.txt"
+  },
+
+  "design_grid": {
+    "fill_levels": [0.00, 0.25, 0.50, 0.75, 0.95],
+    "positions": ["start", "middle", "end"],
+    "noise_types": ["peer_materials"],
+    "reports": ["MSFT"],
+    "reps_per_cell": 7,
+    "baseline_cells": 1,
+    "noise_cells": 12,
+    "total_cells": 13,
+    "total_runs_per_arm": 91,
+    "questions_per_run": 8,
+    "tiers": {
+      "tier_1_factual": ["F01", "F02", "F03"],
+      "tier_2_calculation": ["C01", "C02"],
+      "tier_3_synthesis": ["S01", "S02", "S03"]
+    }
+  },
+
+  "instruments_held_constant_across_arms": {
+    "rationale": "The extractor is mechanical normalization; the judge is the measuring instrument. If either varies between arms, observed drift differences cannot be attributed cleanly to the analyst.",
+    "extractor": {
+      "snapshot": "claude-haiku-4-5-20251001",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": null
+    },
+    "judge_primary": {
+      "snapshot": "claude-opus-4-7",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": "max"
+    },
+    "judge_secondary": {
+      "snapshot": "claude-sonnet-4-6",
+      "max_output_tokens": 8192,
+      "temperature": 1.0,
+      "thinking_effort": "high",
+      "subsample_pct": 20
+    }
+  },
+
+  "what_varies_across_arms": [
+    "models.analyst.snapshot",
+    "models.analyst.context_window",
+    "models.analyst.thinking_effort",
+    "models.analyst.max_output_tokens",
+    "tokens.total_context_target (only when analyst context window differs)",
+    "tokens.report_token_cap (proportional to total_context_target)"
+  ],
+
+  "what_must_not_vary_across_arms": [
+    "DESIGN.md, PROMPTS.md, RUBRIC.md (frozen — methodology_hash gates this)",
+    "materials/* (frozen — materials_lock_hash gates this)",
+    "design_grid (cells, fill levels, positions, reps, questions)",
+    "extractor configuration",
+    "judge_primary configuration",
+    "judge_secondary configuration",
+    "noise pool seeding scheme (sha256 over (report, fill, position, rep))"
+  ],
+
+  "noise_seeding_scheme": "sha256(f'{report}|{fill_pct}|{position}|{rep_idx}') drives the FFD noise pack. Analyst snapshot is NOT an input — three arms see byte-identical assembled prompts for the same (cell, rep) coordinates. This is what makes cross-arm comparison meaningful.",
+
+  "locked_at": "2026-04-25T00:00:00Z",
+  "locked_by": "Victor Zhang <victor.zhang.eu@gmail.com>",
+  "lock_notes": "Original Opus 4.7 arm completed 2026-04-25 ($582.33, 91/91/91 runs). Multi-arm refactor lands this lock file. Sonnet 4.6 and Haiku 4.5 arms configured but not yet executed."
+}

@@ -1,0 +1,92 @@
+{
+  "$schema_version": "1.0",
+  "arm_name": "opus-4-7",
+  "arm_description": "Opus 4.7 with adaptive extended thinking at max effort. Original lock arm.",
+
+  "pre_registration": {
+    "hash": "61b2d30f0c741bd96f24159fedc814276df565de317f780e117a3c7e32100419",
+    "lock_file": "../../pre_registration.lock",
+    "note": "MUST match pre_registration.lock.methodology_hash. compare_arms.py refuses to run if any arm's hash differs."
+  },
+
+  "materials": {
+    "lock_hash": "c13b5514279c9d8dbc5118ec9b3b1325a0cff56c4fb1cee8d66992a98cd25199",
+    "lock_path": "../../materials/materials.lock.json",
+    "note": "MUST match pre_registration.lock.materials_lock_hash. compare_arms.py refuses to run if any arm's materials hash differs."
+  },
+
+  "analyst": {
+    "snapshot": "claude-opus-4-7",
+    "context_window": 1000000,
+    "thinking_effort": "max",
+    "max_output_tokens": 32768,
+    "temperature": 1.0
+  },
+
+  "instruments_used": {
+    "extractor": {
+      "snapshot": "claude-haiku-4-5-20251001",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": null
+    },
+    "judge_primary": {
+      "snapshot": "claude-opus-4-7",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": "max"
+    },
+    "judge_secondary": {
+      "snapshot": "claude-sonnet-4-6",
+      "max_output_tokens": 8192,
+      "temperature": 1.0,
+      "thinking_effort": "high",
+      "subsample_pct": 20
+    }
+  },
+
+  "design_used": {
+    "fill_levels": [0.00, 0.25, 0.50, 0.75, 0.95],
+    "positions": ["start", "middle", "end"],
+    "noise_types": ["peer_materials"],
+    "reports": ["MSFT"],
+    "reps_per_cell": 7,
+    "tokens_total_context_target": 1000000,
+    "tokens_report_token_cap": 130000
+  },
+
+  "pricing_at_lock_usd_per_million_tokens": {
+    "opus_4_7":   {"input": 15.00, "output": 75.00, "cache_read": 1.50, "cache_write": 18.75},
+    "sonnet_4_6": {"input": 3.00,  "output": 15.00, "cache_read": 0.30, "cache_write": 3.75},
+    "haiku_4_5":  {"input": 0.80,  "output": 4.00,  "cache_read": 0.08, "cache_write": 1.00}
+  },
+  "pricing_note": "Snapshotted to allow honest cost reconstruction even if API pricing changes after this arm closes.",
+
+  "execution_results": {
+    "collect_runs_completed": 91,
+    "extract_records_total": 728,
+    "extract_records_parsed_ok": 720,
+    "extract_records_parsed_ok_pct": 98.9,
+    "grade_records_completed": 728,
+    "cumulative_cost_usd": 582.33,
+    "budget_usd": 700.00,
+    "hard_stop_usd": 850.00
+  },
+
+  "data_integrity": {
+    "data_root": "data/",
+    "data_manifest_path": "data.manifest.sha256",
+    "data_manifest_sha256_self": "b57834e393e6163ee03b2479262712ca8c434a6531d96ccf98f751a31b538dba",
+    "data_manifest_sha256_self_recipe": "sha256 of arms/opus-4-7/data.manifest.sha256 file bytes",
+    "verify_command": "python3 -m scripts.verify_arm_integrity --arm opus-4-7"
+  },
+
+  "git_anchor": {
+    "tag": "arm/opus-4-7/data-v1.0",
+    "note": "Tag points to the commit immediately before the multi-arm refactor — full pre-refactor state recoverable via `git checkout arm/opus-4-7/data-v1.0`."
+  },
+
+  "locked_at": "2026-04-25T00:00:00Z",
+  "locked_by": "Victor Zhang <victor.zhang.eu@gmail.com>",
+  "reports": ["reports/FINAL_REPORT.md"]
+}

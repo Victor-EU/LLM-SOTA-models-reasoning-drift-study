@@ -13,10 +13,14 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
+import httpx
 from anthropic import (
     APIConnectionError,
+    APIError,
     APIStatusError,
+    APITimeoutError,
     AsyncAnthropic,
+    InternalServerError,
     RateLimitError,
 )
 
@@ -67,10 +71,27 @@ class CallResult:
 # ---- retry helpers -------------------------------------------------------
 
 def _is_retriable(exc: BaseException) -> bool:
-    if isinstance(exc, (RateLimitError, APIConnectionError)):
+    # Anthropic SDK exceptions
+    if isinstance(exc, (RateLimitError, APIConnectionError, APITimeoutError, InternalServerError)):
         return True
     if isinstance(exc, APIStatusError):
         return 500 <= int(getattr(exc, "status_code", 0)) < 600
+    # httpx-level transient streaming errors. Long Sonnet/Opus calls (5-15 min)
+    # frequently see the upstream connection drop mid-response — the server
+    # accepted the request but the chunked stream was cut. Always retriable.
+    if isinstance(exc, (httpx.RemoteProtocolError, httpx.ReadError, httpx.ReadTimeout,
+                        httpx.WriteError, httpx.ConnectError, httpx.ConnectTimeout,
+                        httpx.PoolTimeout)):
+        return True
+    # Last-resort: anthropic.APIError whose message looks like a transient
+    # network/stream failure. Catches edge cases where the SDK wraps the
+    # underlying httpx error in a custom type without preserving the type info.
+    if isinstance(exc, APIError):
+        msg = str(exc).lower()
+        for marker in ("peer closed", "incomplete chunked", "connection reset",
+                       "connection aborted", "stream", "remote protocol"):
+            if marker in msg:
+                return True
     return False
 
 

@@ -1,0 +1,11 @@
+{
+  "doc_id": "crm_10k_fy2026",
+  "noise_type": "peer_materials",
+  "title": "Salesforce Inc. Form 10-K FY2026",
+  "ticker": "CRM",
+  "fiscal_period": "fiscal year ended January 31, 2026",
+  "sha256": "f9a796274b9deeca366299e706c828d856f30d5b323b8a08149174855b453b76",
+  "token_count": 102063,
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852426000060/crm-20260131.htm",
+  "pair_target": "MSFT"
+}

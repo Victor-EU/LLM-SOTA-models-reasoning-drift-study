@@ -1,0 +1,48 @@
+{
+  "files": {
+    "ground_truth/MSFT.json": {
+      "sha256": "74fa6c1379524756a918584b0a044a41903556fd5d8a2192dea22fa88109bd42",
+      "token_count": 7289
+    },
+    "noise/peer_materials/MSFT/aapl_10k_fy2025.txt": {
+      "sha256": "ff93a84106700237bfbfc042b14f2d00570f47411b5deed359ea0aaf654da792",
+      "token_count": 51644
+    },
+    "noise/peer_materials/MSFT/amzn_10k_fy2025.txt": {
+      "sha256": "9700c86dd5f4bfac088a59eb472e1e5a6fa9d02ceeab38ed71982f4fa5c8061b",
+      "token_count": 70682
+    },
+    "noise/peer_materials/MSFT/crm_10k_fy2026.txt": {
+      "sha256": "f9a796274b9deeca366299e706c828d856f30d5b323b8a08149174855b453b76",
+      "token_count": 102063
+    },
+    "noise/peer_materials/MSFT/googl_10k_fy2025.txt": {
+      "sha256": "49d27a9e439e639e7d75a6f488c939ab29b7c7c6e40038d35b85bb09fd5b0abc",
+      "token_count": 86080
+    },
+    "noise/peer_materials/MSFT/meta_10k_fy2025.txt": {
+      "sha256": "67157d79a8fc2a616a398cb64d7468714fa49b4da3dfca15897fb177d20b9462",
+      "token_count": 128945
+    },
+    "noise/peer_materials/MSFT/nvda_10k_fy2026.txt": {
+      "sha256": "3b81d5d8f09b89b22a65e3165c82c33db1b84451a78b3ed781095a6c2d707ebd",
+      "token_count": 85094
+    },
+    "noise/peer_materials/MSFT/orcl_10k_fy2025.txt": {
+      "sha256": "3bca52eb863c22350cbecae288fd9612020ca13c72d93e9a4b6b8289aa5e14af",
+      "token_count": 104101
+    },
+    "questions/MSFT.json": {
+      "sha256": "19ac9f8f4d1b124ef15a648b944b01eae684c2f586c8e3f2b9407619889128f3",
+      "token_count": 1148
+    },
+    "target/MSFT/10k.txt": {
+      "sha256": "681266fb085945f8b2d42b9349ca9350d67df06f8cc5fcdd48b786f5cb686263",
+      "token_count": 79518
+    },
+    "target/MSFT/earnings_call.txt": {
+      "sha256": "f48deb2c1899174b36428db13d6f615833980ed785ad4239520b810c06378eb5",
+      "token_count": 15314
+    }
+  }
+}

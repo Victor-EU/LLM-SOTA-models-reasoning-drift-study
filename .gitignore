@@ -1,0 +1,32 @@
+# Secrets — NEVER commit
+.env
+.env.local
+*.key
+*.pem
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# SQLite transient sidecar files (WAL/journal/shm) — never integrity-relevant.
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Per-arm experimental data IS tracked under arms/{arm}/data/ — those records
+# are the locked artifact and must be reproducible byte-for-byte. Only the
+# obsolete pre-refactor location is ignored.
+
+# Editors
+.vscode/
+.idea/
+*.swp

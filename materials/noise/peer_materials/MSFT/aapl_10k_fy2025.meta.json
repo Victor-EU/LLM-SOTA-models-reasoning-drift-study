@@ -1,0 +1,11 @@
+{
+  "doc_id": "aapl_10k_fy2025",
+  "noise_type": "peer_materials",
+  "title": "Apple Inc. Form 10-K FY2025",
+  "ticker": "AAPL",
+  "fiscal_period": "fiscal year ended September 27, 2025",
+  "sha256": "ff93a84106700237bfbfc042b14f2d00570f47411b5deed359ea0aaf654da792",
+  "token_count": 51644,
+  "source_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+  "pair_target": "MSFT"
+}

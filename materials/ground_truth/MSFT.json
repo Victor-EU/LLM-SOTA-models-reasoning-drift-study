@@ -1,0 +1,426 @@
+[
+  {
+    "q_id": "MSFT-F-01",
+    "tier": 1,
+    "canonical_answer": 281724,
+    "unit": "USD_millions",
+    "tolerance_abs": null,
+    "tolerance_rel": 0.002,
+    "citation_spans": [
+      "Item 8, Financial Statements, Income Statements, Total revenue line for fiscal year ended June 30, 2025",
+      "Item 7, MD&A, Summary Results of Operations"
+    ],
+    "common_distractors": [
+      245122,
+      211915,
+      416161,
+      400000,
+      637959,
+      164501,
+      130497,
+      57399,
+      39557
+    ],
+    "common_distractors_notes": "FY24 MSFT (245,122) and FY23 MSFT (211,915) — same-company prior-year mix-ups. AAPL FY25 (~416,161), GOOGL FY25 (>400,000), AMZN FY25 (~637,959), META FY25 (~164,501), NVDA FY26 (~130,497), ORCL FY25 (~57,399), CRM FY26 (~39,557) — peer revenues that would indicate cross-contamination.",
+    "evidentiary_anchors": null
+  },
+  {
+    "q_id": "MSFT-F-02",
+    "tier": 1,
+    "canonical_answer": 128528,
+    "unit": "USD_millions",
+    "tolerance_abs": null,
+    "tolerance_rel": 0.002,
+    "citation_spans": [
+      "Item 8, Financial Statements, Income Statements, Operating income line for fiscal year ended June 30, 2025",
+      "Item 7, MD&A, Summary Results of Operations"
+    ],
+    "common_distractors": [
+      109433,
+      88523,
+      69773,
+      44589,
+      14166,
+      123627,
+      101832
+    ],
+    "common_distractors_notes": "FY24 op income (109,433) and FY23 (88,523) — prior-year mix-ups. Segment operating incomes 69,773/44,589/14,166 — confusing segment with total. Income before tax (123,627) and net income (101,832) — adjacent line items.",
+    "evidentiary_anchors": null
+  },
+  {
+    "q_id": "MSFT-F-03",
+    "tier": 1,
+    "canonical_answer": 13.64,
+    "unit": "USD",
+    "tolerance_abs": 0.02,
+    "tolerance_rel": null,
+    "citation_spans": [
+      "Item 8, Financial Statements, Income Statements, Earnings per share — Diluted line for fiscal year ended June 30, 2025"
+    ],
+    "common_distractors": [
+      13.70,
+      11.80,
+      11.86,
+      9.68,
+      9.72
+    ],
+    "common_distractors_notes": "13.70 = FY25 basic EPS (confusing basic vs diluted). 11.80 = FY24 diluted EPS; 11.86 = FY24 basic. 9.68/9.72 = FY23.",
+    "evidentiary_anchors": null
+  },
+  {
+    "q_id": "MSFT-C-01",
+    "tier": 2,
+    "canonical_answer": 17.6,
+    "unit": "percent",
+    "tolerance_abs": 0.2,
+    "tolerance_rel": null,
+    "citation_spans": [
+      "Item 8, Financial Statements, Income Statements — Provision for income taxes and Income before income taxes for fiscal year ended June 30, 2025",
+      "Item 7, MD&A, Income Taxes"
+    ],
+    "common_distractors": [
+      18.2,
+      19.0,
+      21.0
+    ],
+    "common_distractors_notes": "18.2 = FY24 effective tax rate (19,651/107,787). 19.0 = Q3 FY26 adjusted tax rate disclosed in earnings call. 21.0 = US statutory rate, commonly misstated.",
+    "computation_note": "21795 / 123627 * 100 = 17.63%; rounds to 17.6%",
+    "evidentiary_anchors": null
+  },
+  {
+    "q_id": "MSFT-C-02",
+    "tier": 2,
+    "canonical_answer": 14.9,
+    "unit": "percent",
+    "tolerance_abs": 0.2,
+    "tolerance_rel": null,
+    "citation_spans": [
+      "Item 8, Financial Statements, Income Statements — Total revenue line for fiscal years 2025 and 2024",
+      "Item 7, MD&A, Summary Results of Operations"
+    ],
+    "common_distractors": [
+      15.0,
+      13.0,
+      21.0,
+      23.0,
+      17.0,
+      26.0,
+      34.0
+    ],
+    "common_distractors_notes": "15% = rounded MD&A headline ('Revenue increased ... or 15%'); acceptable but we want one decimal precision. 13% = P&BP segment growth. 21% = IC segment growth. 23% = Microsoft Cloud growth. 17% = Q2 FY26 total revenue growth (wrong period). 26% = Microsoft Cloud Q2 FY26. 34% = Azure growth.",
+    "computation_note": "(281724 - 245122) / 245122 * 100 = 14.93%; rounds to 14.9%",
+    "evidentiary_anchors": null
+  },
+  {
+    "q_id": "MSFT-S-01",
+    "tier": 3,
+    "canonical_answer": null,
+    "unit": null,
+    "tolerance_abs": null,
+    "tolerance_rel": null,
+    "citation_spans": [],
+    "common_distractors": [],
+    "evidentiary_anchors": [
+      {
+        "anchor_id": "MSFT-S-01-a",
+        "summary": "Top-line growth: total revenue of $281.7B in FY2025, up 15% from $245.1B in FY2024, with growth across all three reporting segments. Operating income of $128.5B, up 17%.",
+        "citation_span": "Item 7, MD&A, Summary Results of Operations; Reportable Segments, Fiscal Year 2025 Compared with Fiscal Year 2024",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions FY2025 total revenue in the $280-282B range OR revenue growth near +15%",
+          "mentions operating income in the $128-129B range OR op income growth near +17%",
+          "mentions growth being broad-based across all three reporting segments"
+        ],
+        "not_engagement": "generic 'revenue grew strongly' without figures or segment-wide framing"
+      },
+      {
+        "anchor_id": "MSFT-S-01-b",
+        "summary": "AI-infrastructure capex is the dominant pressure on gross margin. Microsoft Cloud gross margin percentage decreased to 69% driven by the impact of scaling AI infrastructure, offset in part by Azure efficiency gains. Similar pressure called out in both Productivity and Business Processes and Intelligent Cloud segment gross margin commentary.",
+        "citation_span": "Item 7, MD&A, Operating Income and segment-level Gross Margin discussion",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions Microsoft Cloud gross margin percentage and its decline (specifically 69% OR the downward direction)",
+          "attributes margin pressure to scaling AI infrastructure",
+          "references Azure efficiency gains as a partial offset to AI-infra pressure",
+          "cites segment-level gross margin commentary (P&BP or Intelligent Cloud GM)"
+        ],
+        "not_engagement": "generic 'margins are under pressure' without naming AI infrastructure as driver"
+      },
+      {
+        "anchor_id": "MSFT-S-01-c",
+        "summary": "Cash generation remains very strong: net cash from operations of $136.2B in FY2025, an increase of $17.6B over FY2024, driven by higher cash received from customers.",
+        "citation_span": "Item 7, MD&A, Cash Flows; Item 8, Financial Statements, Cash Flows Statements",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions operating cash flow figure in the $130-140B range (specifically $136.2B)",
+          "mentions YoY increase in operating cash flow (~$17.6B over FY24)",
+          "references 'cash received from customers' or similar as the driver"
+        ],
+        "not_engagement": "generic 'strong cash generation' with no figure or YoY comparison"
+      },
+      {
+        "anchor_id": "MSFT-S-01-d",
+        "summary": "Capex surge: additions to property and equipment of $64.6B in FY2025 vs $44.5B in FY2024 and $28.1B in FY2023, with a further $32.1B committed for construction of datacenter buildings and improvements as of June 30, 2025.",
+        "citation_span": "Item 8, Financial Statements, Cash Flows Statements — Investing; Note 6, Property and Equipment",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions FY25 capex figure in the $60-70B range (specifically $64.6B)",
+          "mentions multi-year capex trajectory ($28B FY23 → $44.5B FY24 → $64.6B FY25) or at least two of these three points",
+          "mentions the $32.1B committed for datacenter construction as of fiscal year end",
+          "frames capex in context of AI / cloud infrastructure buildout"
+        ],
+        "not_engagement": "generic 'capex is large' without figures or trajectory"
+      },
+      {
+        "anchor_id": "MSFT-S-01-e",
+        "summary": "Capital return to shareholders: $13.0B share repurchases (31M shares) plus $24.7B dividends in FY2025; $57.3B remaining of the $60B authorization approved September 2024, commenced April 2025.",
+        "citation_span": "Item 7, MD&A, Share Repurchases; Dividends; Note 15, Stockholders' Equity",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions share repurchases near $13B OR 31M shares",
+          "mentions dividends paid near $24.7B",
+          "mentions the $60B September 2024 authorization OR $57.3B remaining at fiscal year end"
+        ],
+        "not_engagement": "generic 'returns capital to shareholders' without figures"
+      },
+      {
+        "anchor_id": "MSFT-S-01-f",
+        "summary": "Disclosed headwind / execution risk: explicit risk factor that 'Our focus on cloud-based and AI services presents execution and competitive risks. We are incurring significant costs to build and maintain infrastructure to support cloud-based and AI services, reducing operating margins.'",
+        "citation_span": "Item 1A, Risk Factors, Risks Relating to the Evolution of Our Business",
+        "source": "10-K",
+        "engagement_signals": [
+          "quotes or paraphrases the Item 1A risk factor about cloud/AI execution risk reducing operating margins",
+          "frames this as management's own disclosed risk (Item 1A attribution), not inferred from general knowledge",
+          "links the risk factor to the capex / margin pressure narrative in MD&A"
+        ],
+        "not_engagement": "generic 'there are AI execution risks' without citing Item 1A or the specific risk language"
+      }
+    ]
+  },
+  {
+    "q_id": "MSFT-S-02",
+    "tier": 3,
+    "canonical_answer": null,
+    "unit": null,
+    "tolerance_abs": null,
+    "tolerance_rel": null,
+    "citation_spans": [],
+    "common_distractors": [],
+    "evidentiary_anchors": [
+      {
+        "anchor_id": "MSFT-S-02-a",
+        "summary": "Segment reorganization effective Q1 FY2025: commercial components of Microsoft 365 consolidated into the Productivity and Business Processes segment; prior-period segment data recast to the new structure. Signals management focus on M365 Commercial cloud as a unified business.",
+        "citation_span": "Item 1, Business — Segments overview; Item 7, MD&A, Reportable Segments (segment-change disclosure)",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions the segment change effective Q1 FY2025",
+          "mentions commercial components of M365 moving into Productivity and Business Processes",
+          "mentions prior-period segment data being recast / restated",
+          "interprets as management signaling M365 Commercial cloud as a unified business"
+        ],
+        "not_engagement": "generic 'MSFT has three segments' without recognizing the FY25 reorganization"
+      },
+      {
+        "anchor_id": "MSFT-S-02-b",
+        "summary": "Productivity and Business Processes: revenue $120.8B (+13%), operating income $69.8B (+17%). Growth driven by Microsoft 365 Commercial cloud (+15% revenue with 6% seat growth), M365 Consumer (+11% with subscriber base of 89.0M), LinkedIn (+9%), and Dynamics 365 (+19%). M365 Commercial products also saw a boost from Office 2024 transactional purchasing.",
+        "citation_span": "Item 7, MD&A, Segment Results of Operations — Productivity and Business Processes",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions P&BP revenue in the $120-121B range OR growth near +13%",
+          "mentions P&BP operating income near $69.8B OR op-income growth +17%",
+          "mentions M365 Commercial cloud growth (+15% revenue OR +6% seat growth)",
+          "mentions LinkedIn +9% OR Dynamics 365 +19%",
+          "mentions M365 Consumer +11% OR subscriber base near 89M"
+        ],
+        "not_engagement": "generic 'Productivity and Business Processes is growing' without segment figures"
+      },
+      {
+        "anchor_id": "MSFT-S-02-c",
+        "summary": "Intelligent Cloud: revenue $106.3B (+21%), operating income $44.6B (+18%). Growth driven by Server products and cloud services +23%, within which Azure and other cloud services grew 34%. Cost of revenue grew 36% as Azure scaled, compressing gross margin percentage.",
+        "citation_span": "Item 7, MD&A, Segment Results of Operations — Intelligent Cloud",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions Intelligent Cloud revenue near $106B OR growth +21%",
+          "mentions operating income near $44.6B",
+          "mentions Azure and other cloud services +34%",
+          "mentions Server products and cloud services +23%",
+          "mentions cost of revenue +36% or gross-margin compression from Azure scaling"
+        ],
+        "not_engagement": "generic 'Azure is the growth engine' without segment-level figures"
+      },
+      {
+        "anchor_id": "MSFT-S-02-d",
+        "summary": "More Personal Computing: revenue $54.6B (+7%), operating income $14.2B (+18%). Windows OEM and Devices revenue +3% with strong Windows OEM execution; gaming and Search and news advertising (Bing + Copilot) also contributed.",
+        "citation_span": "Item 7, MD&A, Segment Results of Operations — More Personal Computing",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions MPC revenue near $54.6B OR growth +7%",
+          "mentions MPC operating income near $14.2B OR +18% growth",
+          "mentions Windows OEM and Devices +3%",
+          "mentions gaming contribution OR Search and news advertising (Bing + Copilot) contribution"
+        ],
+        "not_engagement": "generic 'MPC includes Windows and Gaming' without financial figures"
+      },
+      {
+        "anchor_id": "MSFT-S-02-e",
+        "summary": "Management commentary during Q2 FY2026 earnings call frames strategy around three layers: cloud / 'Token Factory' (Maya 200 accelerator, Cobalt 200), agent platform (Foundry, agents as the new apps, 80% of Fortune 500 active on agent tools), and high-value agentic experiences (15M paid M365 Copilot seats, GitHub Copilot subscribers +75% YoY).",
+        "citation_span": "Earnings call (Q2 FY2026, 2026-01-28), prepared remarks — Satya Nadella on Cloud and Token Factory, Agent Platform, and Agentic Experiences",
+        "source": "earnings_call",
+        "engagement_signals": [
+          "mentions the three-layer framework from Q2 FY26 call (cloud/Token Factory, agent platform, agentic experiences)",
+          "mentions Maya 200 accelerator OR Cobalt 200 silicon",
+          "mentions Foundry as the agent platform",
+          "mentions 15M paid M365 Copilot seats OR GitHub Copilot +75% YoY OR 80% of Fortune 500 active on agent tools",
+          "attributes framing to Satya Nadella prepared remarks"
+        ],
+        "not_engagement": "generic 'management is focused on AI' without naming layers or Q2 FY26 call specifics"
+      },
+      {
+        "anchor_id": "MSFT-S-02-f",
+        "summary": "Microsoft Cloud (a cross-segment aggregate spanning M365 Commercial cloud, Azure, LinkedIn commercial, Dynamics 365) reached $168.9B revenue in FY2025, +23%. Surpassed $50B quarterly for the first time in Q2 FY2026 ($51.5B, +26% CC), indicating the cloud business remains the growth engine across segments.",
+        "citation_span": "Item 7, MD&A, Summary Results of Operations — Microsoft Cloud; Earnings call (Q2 FY2026) prepared remarks",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions Microsoft Cloud FY25 revenue near $168.9B OR growth +23%",
+          "mentions MS Cloud surpassing $50B quarterly OR Q2 FY26 $51.5B / +26% CC",
+          "frames Microsoft Cloud as cross-segment aggregate spanning M365 Commercial cloud, Azure, LinkedIn commercial, Dynamics 365"
+        ],
+        "not_engagement": "generic 'Microsoft Cloud is a large business' without cross-segment framing"
+      },
+      {
+        "anchor_id": "MSFT-S-02-g",
+        "summary": "OpenAI partnership: long-term strategic partnership; MSFT holds rights to OpenAI IP including models and infrastructure; OpenAI API is exclusive to Azure; reciprocal revenue-sharing; right of first refusal on OpenAI capacity needs. Commercial RPO composition reveals ~45% tied to OpenAI per Q2 FY2026 call.",
+        "citation_span": "Item 7, MD&A, Operational Highlights; Earnings call (Q2 FY2026) prepared remarks — Amy Hood on commercial RPO composition",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions OpenAI API exclusivity to Azure",
+          "mentions MSFT rights to OpenAI IP (models and infrastructure)",
+          "mentions ~45% OpenAI share of commercial RPO from the Q2 FY26 earnings call",
+          "mentions reciprocal revenue sharing OR right of first refusal on OpenAI capacity needs"
+        ],
+        "not_engagement": "generic 'Microsoft and OpenAI are partners' without partnership-structure specifics"
+      }
+    ]
+  },
+  {
+    "q_id": "MSFT-S-03",
+    "tier": 3,
+    "canonical_answer": null,
+    "unit": null,
+    "tolerance_abs": null,
+    "tolerance_rel": null,
+    "citation_spans": [],
+    "common_distractors": [],
+    "evidentiary_anchors": [
+      {
+        "anchor_id": "MSFT-S-03-a",
+        "summary": "DEMAND — cloud contracts. Commercial remaining performance obligation (RPO) of $625B with weighted-average duration ~2.5 years (extended from ~2.0y prior quarter); ~45% tied to OpenAI, non-OpenAI portion grew 28% year-over-year. Quantifies demand visibility AND concentration profile simultaneously — engagement recognized from either interpretation (secured multi-year demand OR customer-concentration exposure).",
+        "citation_span": "Earnings call (Q2 FY2026, 2026-01-28), Amy Hood prepared remarks on commercial RPO; Q&A with Brent Thill on OpenAI exposure composition",
+        "source": "earnings_call",
+        "engagement_signals": [
+          "mentions commercial RPO figure in the $500-700B range (target $625B)",
+          "mentions ~45% OpenAI share OR non-OpenAI RPO growth ~28% YoY",
+          "mentions weighted-average duration near 2.5y OR duration extension from ~2.0y",
+          "either framing: multi-year demand visibility OR customer-concentration risk"
+        ],
+        "not_engagement": "generic 'Azure has strong demand' without RPO figure or OpenAI-share composition"
+      },
+      {
+        "anchor_id": "MSFT-S-03-b",
+        "summary": "DEMAND — AI product adoption. 4.7M paid Copilot subscribers (+75% YoY); 15M paid Microsoft 365 Copilot seats; M365 Copilot seat adds +160% YoY; Copilot Pro Plus for individual devs +77% QoQ; M365 Copilot DAU 10x YoY; 24B Copilot interactions audited by Purview (+9x). Context: M365 Commercial paid seats reached 450M+ in FY25. 15M / 450M ≈ 3.3% attach rate — engagement recognized from either interpretation (rapid adoption velocity OR early-stage monetization with long runway of skepticism).",
+        "citation_span": "Earnings call (Q2 FY2026), Satya Nadella prepared remarks on Copilot adoption + Amy Hood on M365 Commercial seats; Item 7 MD&A, Productivity and Business Processes segment on M365 Commercial seat growth of 6%",
+        "source": "earnings_call",
+        "engagement_signals": [
+          "mentions 4.7M paid Copilot subscribers OR +75% YoY",
+          "mentions 15M paid M365 Copilot seats OR +160% YoY seat adds",
+          "mentions M365 Copilot DAU 10x YoY OR 24B Copilot interactions",
+          "references attach-rate framing (15M / 450M M365 Commercial seats ≈ 3.3%)",
+          "either framing: rapid adoption velocity OR low attach rate / early-stage monetization"
+        ],
+        "not_engagement": "generic 'Copilot is growing fast' without adoption figures or attach-rate context"
+      },
+      {
+        "anchor_id": "MSFT-S-03-c",
+        "summary": "COMPLEMENTARITY — Azure / agents. Azure AI Foundry hosts broadest model catalog of any hyperscaler including GPT-5.0.2 AND Claude 4.5; 1,500+ customers actively use both Anthropic and OpenAI models on Foundry; Agent 365 extends Microsoft's identity/security/management stack to agents. Engagement recognized from either interpretation (Azure as durable substrate for agent economy whose consumption scales with every agent call OR Azure as commoditized inference provider reselling competitors' models with thin differentiation).",
+        "citation_span": "Earnings call (Q2 FY2026), Satya Nadella prepared remarks on Agent Platform and model catalog; Item 1 Business, Intelligent Cloud — Azure AI offerings and Foundry",
+        "source": "earnings_call",
+        "engagement_signals": [
+          "mentions Azure AI Foundry hosting GPT-5 AND Claude 4.5 (multi-model catalog)",
+          "mentions 1,500+ customers using both Anthropic and OpenAI models on Foundry",
+          "mentions Agent 365 extending MSFT identity / security / management stack to agents",
+          "either framing: Azure as durable agent-economy substrate OR Azure as commoditized inference reseller"
+        ],
+        "not_engagement": "generic 'Azure runs AI workloads' without Foundry / multi-model specifics"
+      },
+      {
+        "anchor_id": "MSFT-S-03-d",
+        "summary": "COMPLEMENTARITY — M365 / agents. WorkIQ positions M365 as 'the most valuable stateful agent for every organization,' grounding agents in enterprise data within the organization's security boundary; M365 framed as data/context/identity layer for AI. Engagement recognized from either interpretation (M365 data graph as unreplicable AI foundation moat OR incumbent productivity suite vulnerable to AI-native competitors that don't need M365 lock-in).",
+        "citation_span": "Earnings call (Q2 FY2026), Satya Nadella prepared remarks on High-Value Agentic Experiences; Item 1 Business — Productivity and Business Processes on Microsoft 365 Commercial",
+        "source": "earnings_call",
+        "engagement_signals": [
+          "mentions WorkIQ as stateful agent grounded in enterprise data",
+          "mentions M365 as data / context / identity layer for AI",
+          "mentions the organizational security boundary as a structural feature of M365's AI positioning",
+          "either framing: M365 data graph as unreplicable moat OR M365 vulnerable to AI-native substitutes"
+        ],
+        "not_engagement": "generic 'M365 integrates AI' without WorkIQ / data-graph framing"
+      },
+      {
+        "anchor_id": "MSFT-S-03-e",
+        "summary": "SUBSTITUTION — per-unit risk disclosures. Item 1A explicit competitive risk: 'firms ... developing, making available, or using AI models that are open' as a competing business model; Item 1 Azure competition list includes 'cloud service providers and open source offerings' plus 'other emerging competitors and other open source offerings, many of which are also current or potential partners'; search/news advertising ex-TAC grew 10% CC 'slightly below expectations' in Q2 FY2026 with disclosed 'execution challenges.' Substitution intensity varies materially by unit (Bing/search vs Azure vs M365 vs LinkedIn).",
+        "citation_span": "Item 1A Risk Factors — competitive pressure from open source AI models; Item 1 Business — Intelligent Cloud, Azure competition; Earnings call Q2 FY2026 — Amy Hood on More Personal Computing search results",
+        "source": "10-K",
+        "engagement_signals": [
+          "quotes or paraphrases the Item 1A risk factor about open-source AI models as a competing business model",
+          "mentions the Item 1 Azure competition list including 'cloud service providers and open source offerings'",
+          "mentions search/news advertising ex-TAC +10% CC 'slightly below expectations' OR disclosed execution challenges",
+          "recognizes that substitution intensity varies across units (Bing vs Azure vs M365 vs LinkedIn vs Gaming)"
+        ],
+        "not_engagement": "generic 'AI faces competition' without per-unit differentiation or Item 1A citation"
+      },
+      {
+        "anchor_id": "MSFT-S-03-f",
+        "summary": "SUPPLY CONSTRAINT — Azure. AI-driven capex ramp: $64.6B FY25 additions to property and equipment (vs $44.5B FY24 and $28.1B FY23); Q2 FY26 single-quarter capex $37.5B with approximately two-thirds on short-lived assets (GPUs/CPUs); $32.1B committed for datacenter construction at fiscal year-end. Management explicit: 'customer demand continues to exceed our supply' (Amy Hood). Item 7 MD&A names 'permitted and buildable land, predictable energy, networking supplies, and servers, including graphics processing units (GPUs) and other components' as supply dependencies. Engagement recognized from either interpretation (capacity-bound growth = pricing power + insurmountable scale moat OR capacity-bound growth = massive stranded-capex risk if demand shape shifts, with 6-year depreciation on short-lived GPUs).",
+        "citation_span": "Item 8 Cash Flows Statements — Additions to property and equipment; Note 6 Property and Equipment; Item 7 MD&A — Economic Conditions and Other Planned Uses of Capital; Earnings call Q2 FY2026 — Amy Hood on capex allocation and supply constraint",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions FY25 capex $64.6B OR Q2 FY26 single-quarter capex $37.5B",
+          "mentions ~2/3 of Q2 FY26 capex on short-lived assets (GPUs/CPUs)",
+          "mentions $32.1B committed for datacenter construction at fiscal year end",
+          "quotes or paraphrases Amy Hood: 'customer demand continues to exceed our supply'",
+          "mentions supply dependencies (land, energy, networking, GPUs) from Item 7 MD&A",
+          "either framing: capacity-bound as moat / pricing power OR stranded-capex risk on short-lived GPU depreciation"
+        ],
+        "not_engagement": "generic 'capex is growing' without supply-constraint framing or specific figures"
+      },
+      {
+        "anchor_id": "MSFT-S-03-g",
+        "summary": "UNIT ECONOMICS / margin trajectory. Microsoft Cloud gross margin 69% in FY2025 (decreased) with decline explicitly attributed to scaling AI infrastructure, offset in part by Azure efficiency gains; Q2 FY2026 company gross margin 68% down slightly YoY from same driver; Q3 FY2026 Microsoft Cloud gross margin expected 'roughly 65% down year over year driven by continued investments in AI.' Silicon-side response: Maya 200 accelerator claimed to deliver 30%+ TCO improvement over current fleet at FP4 precision. Engagement recognized from either interpretation (temporary margin compression with efficiency recovery as fleet matures OR structural margin re-rate as AI changes unit economics permanently).",
+        "citation_span": "Item 7 MD&A — Gross Margin commentary (Productivity and Business Processes, Intelligent Cloud, Microsoft Cloud aggregate); Earnings call Q2 FY2026 — Amy Hood on gross margin and Q3 outlook; Satya Nadella on Maya 200 TCO claims",
+        "source": "10-K",
+        "engagement_signals": [
+          "mentions Microsoft Cloud FY25 gross margin 69% (decreased) OR Q2 FY26 68%",
+          "mentions Q3 FY26 MS Cloud gross margin guide 'roughly 65% down year over year'",
+          "attributes margin compression to AI infrastructure investments",
+          "mentions Maya 200 TCO claim (30%+ improvement over current fleet at FP4)",
+          "mentions Azure efficiency gains as a partial offset",
+          "either framing: temporary compression with efficiency recovery OR structural re-rate as AI changes unit economics permanently"
+        ],
+        "not_engagement": "generic 'margins are changing' without specific margin trajectory"
+      },
+      {
+        "anchor_id": "MSFT-S-03-h",
+        "summary": "ROIC / strategic risk — management's own framing. Item 1A: 'We make significant investments in products and services that may not achieve expected returns... New products and services may not be profitable or may not achieve operating margins as high as we have experienced historically.' Companion: 'Our focus on cloud-based and AI services presents execution and competitive risks. We are incurring significant costs to build and maintain infrastructure to support cloud-based and AI services, reducing operating margins.' These are management's own articulation of the downside case — engagement recognized whether the thesis dismisses them (scale + distribution overcomes) or centers them (capital allocation risk dominates).",
+        "citation_span": "Item 1A Risk Factors — 'We make significant investments in products and services that may not achieve expected returns'; 'Our focus on cloud-based and AI services presents execution and competitive risks'",
+        "source": "10-K",
+        "engagement_signals": [
+          "quotes or paraphrases Item 1A: 'investments in products and services that may not achieve expected returns'",
+          "quotes or paraphrases Item 1A: 'Our focus on cloud-based and AI services presents execution and competitive risks... reducing operating margins'",
+          "frames the language as management's own articulation of the downside (not inferred from general knowledge)",
+          "either stance: risks dismissed (scale + distribution overcomes) OR risks centered (capital allocation risk dominates thesis)"
+        ],
+        "not_engagement": "generic 'Microsoft faces execution risks' without Item 1A attribution or specific risk language"
+      }
+    ]
+  }
+]

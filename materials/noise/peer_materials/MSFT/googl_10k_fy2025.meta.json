@@ -1,0 +1,11 @@
+{
+  "doc_id": "googl_10k_fy2025",
+  "noise_type": "peer_materials",
+  "title": "Alphabet Inc. Form 10-K FY2025",
+  "ticker": "GOOGL",
+  "fiscal_period": "fiscal year ended December 31, 2025",
+  "sha256": "49d27a9e439e639e7d75a6f488c939ab29b7c7c6e40038d35b85bb09fd5b0abc",
+  "token_count": 86080,
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+  "pair_target": "MSFT"
+}

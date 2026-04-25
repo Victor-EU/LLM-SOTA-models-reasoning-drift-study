@@ -1,0 +1,11 @@
+{
+  "doc_id": "meta_10k_fy2025",
+  "noise_type": "peer_materials",
+  "title": "Meta Platforms Inc. Form 10-K FY2025",
+  "ticker": "META",
+  "fiscal_period": "fiscal year ended December 31, 2025",
+  "sha256": "67157d79a8fc2a616a398cb64d7468714fa49b4da3dfca15897fb177d20b9462",
+  "token_count": 128945,
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+  "pair_target": "MSFT"
+}

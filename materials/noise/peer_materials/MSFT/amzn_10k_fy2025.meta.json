@@ -1,0 +1,11 @@
+{
+  "doc_id": "amzn_10k_fy2025",
+  "noise_type": "peer_materials",
+  "title": "Amazon.com Inc. Form 10-K FY2025",
+  "ticker": "AMZN",
+  "fiscal_period": "fiscal year ended December 31, 2025",
+  "sha256": "9700c86dd5f4bfac088a59eb472e1e5a6fa9d02ceeab38ed71982f4fa5c8061b",
+  "token_count": 70682,
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+  "pair_target": "MSFT"
+}

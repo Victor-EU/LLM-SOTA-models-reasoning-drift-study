@@ -1,0 +1,11 @@
+{
+  "doc_id": "nvda_10k_fy2026",
+  "noise_type": "peer_materials",
+  "title": "NVIDIA Corp Form 10-K FY2026",
+  "ticker": "NVDA",
+  "fiscal_period": "fiscal year ended January 25, 2026",
+  "sha256": "3b81d5d8f09b89b22a65e3165c82c33db1b84451a78b3ed781095a6c2d707ebd",
+  "token_count": 85094,
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm",
+  "pair_target": "MSFT"
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "q_id": "MSFT-F-01",
+    "report_id": "MSFT",
+    "tier": 1,
+    "prompt": "What was Microsoft's total revenue for fiscal year 2025 (ended June 30, 2025), in USD millions?"
+  },
+  {
+    "q_id": "MSFT-F-02",
+    "report_id": "MSFT",
+    "tier": 1,
+    "prompt": "What was Microsoft's operating income for fiscal year 2025 (ended June 30, 2025), in USD millions?"
+  },
+  {
+    "q_id": "MSFT-F-03",
+    "report_id": "MSFT",
+    "tier": 1,
+    "prompt": "What was Microsoft's diluted earnings per share for fiscal year 2025 (ended June 30, 2025), in USD?"
+  },
+  {
+    "q_id": "MSFT-C-01",
+    "report_id": "MSFT",
+    "tier": 2,
+    "prompt": "Compute Microsoft's effective tax rate for fiscal year 2025 (ended June 30, 2025), as a percent to one decimal place. Use provision for income taxes divided by income before income taxes."
+  },
+  {
+    "q_id": "MSFT-C-02",
+    "report_id": "MSFT",
+    "tier": 2,
+    "prompt": "Compute year-over-year total-revenue growth from Microsoft's fiscal year 2024 to fiscal year 2025, as a percent to one decimal place."
+  },
+  {
+    "q_id": "MSFT-S-01",
+    "report_id": "MSFT",
+    "tier": 3,
+    "prompt": "Provide a comprehensive assessment of Microsoft's financial health for fiscal year 2025. Ground your assessment in specific 10-K disclosures (MD&A, risk factors, financial statements, footnotes). Cover profitability, cash flow quality, capital structure and capital allocation, and any material risks or headwinds disclosed. Do not speculate beyond the target materials. Your view / stance is welcome as long as every factual claim rests on cited evidence."
+  },
+  {
+    "q_id": "MSFT-S-02",
+    "report_id": "MSFT",
+    "tier": 3,
+    "prompt": "Provide a strategic analysis of Microsoft's positioning across its three reporting segments (Productivity and Business Processes, Intelligent Cloud, More Personal Computing). Use segment-level disclosures in the 10-K and management commentary in the earnings-call transcript. Identify which segments drove growth, which faced headwinds, and what strategic priorities management communicated. Your view / stance is welcome as long as every factual claim rests on cited evidence."
+  },
+  {
+    "q_id": "MSFT-S-03",
+    "report_id": "MSFT",
+    "tier": 3,
+    "prompt": "Build a forward thesis on Microsoft's long-term trajectory (5+ year horizon) under AI diffusion. Your thesis may be bullish, bearish, or mixed across units — we grade the rigor of the reasoning, not the direction of the conclusion. A well-argued bear case citing the same disclosures as a well-argued bull case scores equally well.\n\nStructure your analysis in three parts:\n\n1. DECOMPOSE. Separate Microsoft into its major revenue units. Start from the reporting segments but decompose further where economics differ meaningfully — e.g., within Intelligent Cloud: Azure cloud services vs. Server products; within Productivity and Business Processes: Microsoft 365 Commercial cloud vs. LinkedIn vs. Dynamics 365; within More Personal Computing: Windows OEM vs. Gaming vs. Search and news advertising.\n\n2. APPLY ECONOMIC FRAMEWORKS per unit. For each unit, reason through:\n   - Demand: is AI creating new demand, shifting demand toward this unit, or destroying demand for it?\n   - Complementarity: does AI make this unit's product more valuable (e.g., does agent deployment drive incremental Azure consumption; does Copilot raise M365 ARPU)?\n   - Substitution: is this unit at risk of replacement by AI-native competitors (e.g., AI chat as substitute for search; AI-native productivity tools as substitute for Office; open-source AI models reducing Azure premium)?\n   - Supply constraints: is growth capacity-bound (datacenter power and land, GPU supply, chip-manufacturing lead times)? If yes, is capacity-bound growth a moat or a risk for this unit?\n\n3. SYNTHESIZE. Consolidate unit-level views into a coherent thesis on Microsoft's long-term revenue growth and margin trajectory. The thesis must be internally consistent — if you argue AI is net positive for Azure demand but net negative for M365 subscription growth, spell out the mechanism that connects those views.\n\nGround every factual claim in 10-K or earnings-call disclosures. Label forward assumptions explicitly (e.g., 'assuming AI value accrues primarily at the application layer...') — assumption-labeling is treated as a mark of rigor. Additional analytical lenses (pricing power, switching costs, regulatory risk, capital intensity / ROIC) are welcome where material. Do not draw on general industry knowledge outside the target materials."
+  }
+]

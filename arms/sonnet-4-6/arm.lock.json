@@ -108,5 +108,5 @@
 
   "locked_at": "2026-04-25T20:48:58Z",
   "locked_by": "Victor Zhang <victor.zhang.eu@gmail.com>",
-  "reports": ["reports/FINAL_REPORT.md (TODO)"]
+  "reports": ["reports/FINAL_REPORT.md", "reports/DRIFT_ANALYSIS.txt"]
 }

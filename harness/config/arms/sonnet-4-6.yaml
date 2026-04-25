@@ -5,11 +5,20 @@
 # All other variables (extractor, judge, prompts, materials, design grid,
 # noise pool, seeds) are held identical via base.yaml.
 #
-# VERIFICATION CHECKLIST before kicking off this arm:
-#   - [ ] Confirm Sonnet 4.6 accepts `thinking.type.adaptive` with effort=max
-#         (run scripts/probe_effort.py adapted for Sonnet snapshot).
-#   - [ ] Confirm 1M context window is GA on Sonnet 4.6 snapshot string used
-#         here. If only 200K, override tokens.total_context_target below.
+# VERIFIED 2026-04-25:
+#   - effort=max accepted by claude-sonnet-4-6. Supported levels: low, medium,
+#     high, max (no `xhigh` like Opus 4.7 has).
+#   - Sonnet 4.6 thinking_tokens are EXPOSED via usage.thinking_tokens (Opus
+#     4.7 redacts text and only exposes signature_chars). Both arms log both
+#     fields in api.py — comparison uses whichever the model surfaces.
+#   - At effort=max, Sonnet uses ~17.8K thinking tokens on a baseline run
+#     (no-noise 8-question prompt). Opus typically uses ~1-3K thinking on
+#     the same prompt. This is a real model-behavior difference, NOT a
+#     methodology problem — the experiment measures drift in reasoning
+#     quality, not thinking-token count.
+#   - max_output_tokens=32768 was TOO SMALL: thinking 17.8K + 8 JSON answers
+#     ~24K = 42K needed. 32K caused truncation + malformed JSON. Raised to
+#     65536 for safety headroom (validated in 2026-04-25 smoke retest).
 
 arm:
   name: sonnet-4-6
@@ -18,7 +27,10 @@ arm:
 models:
   analyst:
     snapshot: "claude-sonnet-4-6"
-    context_window: 1000000   # VERIFY: confirm 1M context GA on this snapshot
+    context_window: 1000000
     thinking_effort: "max"
-    max_output_tokens: 32768
+    # 64K — must accommodate Sonnet's heavier thinking allocation at max
+    # effort PLUS the 8-answer JSON body. 32K caused truncation in baseline
+    # smoke test (thinking 17.8K + answers 14.9K = stop_reason=max_tokens).
+    max_output_tokens: 65536
     temperature: 1.0

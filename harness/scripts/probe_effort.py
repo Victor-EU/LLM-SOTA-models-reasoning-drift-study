@@ -1,15 +1,21 @@
 """
-Follow-up probe: discover valid `output_config.effort` values for Opus 4.7
-adaptive thinking, and confirm how thinking telemetry surfaces in responses.
+Follow-up probe: discover valid `output_config.effort` values for a given
+Claude snapshot's adaptive thinking, and confirm how thinking telemetry
+surfaces in responses.
 
 Tests a prompt that invites real reasoning, across candidate effort levels.
 For each, reports: stop_reason, total output_tokens, thinking block count,
 per-block chars (proxy for thinking depth), any thinking_tokens attr.
 
-Total cost: < $0.10 (5 short messages.create calls w/ max_tokens=2048).
+Total cost: < $0.10 per model (5-9 short messages.create calls).
+
+Usage:
+    python -m scripts.probe_effort                                # default opus
+    python -m scripts.probe_effort --model claude-sonnet-4-6      # probe Sonnet
 """
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -31,9 +37,9 @@ REASONING_PROMPT = (
 )
 
 
-def _try_effort(c, effort: str | None) -> dict:
+def _try_effort(c, model: str, effort: str | None) -> dict:
     kwargs = dict(
-        model="claude-opus-4-7",
+        model=model,
         max_tokens=2048,
         temperature=1.0,
         thinking={"type": "adaptive"},
@@ -57,11 +63,23 @@ def _try_effort(c, effort: str | None) -> dict:
 
 
 def main() -> int:
-    c = Anthropic()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model", default="claude-opus-4-7", help="snapshot to probe")
+    parser.add_argument("--efforts", default="low,medium,high,xhigh,max",
+                        help="comma-separated effort values to probe (use 'none' for unset baseline)")
+    args = parser.parse_args()
 
-    # Try each candidate effort value. The first successful one establishes
-    # validity; we continue past failures to discover ALL accepted values.
-    candidates = [None, "low", "medium", "high", "extra", "extra_high", "xhigh", "max", "ultra"]
+    c = Anthropic()
+    print(f"Probing model: {args.model}")
+    print(f"Effort candidates: {args.efforts}")
+
+    candidates: list[str | None] = []
+    for tok in args.efforts.split(","):
+        tok = tok.strip()
+        candidates.append(None if tok in ("", "none") else tok)
+    if None not in candidates:
+        candidates.insert(0, None)   # always include unset baseline
+
     results: dict[str, dict | str] = {}
     for eff in candidates:
         label = f"effort={eff!r}" if eff is not None else "no effort set (default)"
@@ -70,7 +88,7 @@ def main() -> int:
         print(label)
         print("=" * 70)
         try:
-            result = _try_effort(c, eff)
+            result = _try_effort(c, args.model, eff)
             results[label] = result
             for k, v in result.items():
                 print(f"  {k}: {v}")

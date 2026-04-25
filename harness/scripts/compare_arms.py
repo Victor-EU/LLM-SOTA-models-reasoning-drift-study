@@ -120,11 +120,18 @@ def fmt_pct(num, den):
 
 
 def build_comparison(arms: list[tuple[str, Path, dict]]) -> dict:
-    """Return a nested dict: arm -> { 'tier12_acc_by_fill': ..., 'tier3_rq_by_fill': ..., 'cost_usd': float }."""
+    """Return a nested dict: arm -> { 'tier12_acc_by_fill': ..., 'tier3_rq_by_fill': ..., 'cost_usd': float }.
+
+    Schema notes (matches what judge.py / autograder.py write to graded jsonl):
+      tier 1/2 records: top-level `autograde` dict with `correct: bool`.
+      tier 3 records:   top-level `absolute` dict with judge dimensions
+                        (reasoning_quality, unsupported_claims, etc.).
+                        Optional `secondary` dict (Sonnet 20% subsample) and
+                        `pairwise` dict (vs baseline) — not used here.
+    """
     comp: dict = {}
     for name, arm_dir, arm_lock in arms:
         records = load_graded_records(arm_dir)
-        # Group by fill_pct
         tier12_by_fill: dict[float, list[bool]] = defaultdict(list)
         tier3_rq_by_fill: dict[float, list[float]] = defaultdict(list)
         tier3_unsupported_by_fill: dict[float, list[float]] = defaultdict(list)
@@ -134,11 +141,11 @@ def build_comparison(arms: list[tuple[str, Path, dict]]) -> dict:
                 ag = r.get("autograde", {}) or {}
                 tier12_by_fill[fill].append(bool(ag.get("correct")))
             elif r.get("tier") == 3:
-                judgement = r.get("judgement", {}) or {}
-                rq = judgement.get("reasoning_quality")
+                absolute = r.get("absolute", {}) or {}
+                rq = absolute.get("reasoning_quality")
                 if rq is not None:
                     tier3_rq_by_fill[fill].append(float(rq))
-                un = judgement.get("unsupported_claims")
+                un = absolute.get("unsupported_claims")
                 if un is not None:
                     tier3_unsupported_by_fill[fill].append(float(un))
         comp[name] = {

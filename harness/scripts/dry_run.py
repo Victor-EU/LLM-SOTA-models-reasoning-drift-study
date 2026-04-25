@@ -33,7 +33,7 @@ from src.assembly import assemble, compute_noise_split  # noqa: E402
 from src.cells import (  # noqa: E402
     CellSpec, RunSpec, filter_to_pilot, generate_cells, make_run_id, summarize,
 )
-from src.config import ExperimentConfig, load_config  # noqa: E402
+from src.config import ExperimentConfig, load_arm_config  # noqa: E402
 from src.materials import Materials, load_materials  # noqa: E402
 
 
@@ -107,18 +107,20 @@ def _estimate_cost(cfg: ExperimentConfig, cells: list[CellSpec], pilot: bool) ->
     opus = cfg.cost.pricing["opus_4_7"]
     sonnet = cfg.cost.pricing["sonnet_4_6"]
     haiku = cfg.cost.pricing["haiku_4_5"]
+    # Analyst pricing varies by arm — judge stays Opus across all arms.
+    analyst_pricing = cfg.cost.pricing[cfg.model_family(cfg.models.analyst.snapshot)]
 
     total_runs = len(cells) * reps
     n_tier3_per_run = 3                          # Q6, Q7, Q8
 
-    # Analyst (collect)
+    # Analyst (collect) — priced with the arm's analyst family, not hardcoded Opus.
     avg_input_tokens = int(
         sum(int(cfg.tokens.total_context_target * c.fill_pct)
             if c.fill_pct > 0 else cfg.tokens.report_token_cap
             for c in cells) / max(1, len(cells))
     )
-    per_cell_write_usd = avg_input_tokens * opus.cache_write / 1_000_000
-    per_cell_read_usd = (reps - 1) * avg_input_tokens * opus.cache_read / 1_000_000
+    per_cell_write_usd = avg_input_tokens * analyst_pricing.cache_write / 1_000_000
+    per_cell_read_usd = (reps - 1) * avg_input_tokens * analyst_pricing.cache_read / 1_000_000
     collect_input_usd = len(cells) * (per_cell_write_usd + per_cell_read_usd)
 
     # Analyst output: adaptive thinking + answer. Opus 4.7 at effort=max
@@ -131,7 +133,7 @@ def _estimate_cost(cfg: ExperimentConfig, cells: list[CellSpec], pilot: bool) ->
         "high": 8000, "xhigh": 15000, "max": 20000,
     }
     avg_output_tokens = effort_to_output_estimate.get(cfg.models.analyst.thinking_effort, 20000)
-    collect_output_usd = total_runs * avg_output_tokens * opus.output / 1_000_000
+    collect_output_usd = total_runs * avg_output_tokens * analyst_pricing.output / 1_000_000
 
     # Extractor
     extract_usd = total_runs * (5_000 * haiku.input + 500 * haiku.output) / 1_000_000

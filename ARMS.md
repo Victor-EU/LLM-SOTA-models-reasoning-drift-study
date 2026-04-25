@@ -192,16 +192,20 @@ discoverable by `compare_arms.py`. Required fields:
 
 ## Cost expectations per arm
 
-These are estimates; live cost lands in each arm's `arm.lock.json`. Costs
-scale roughly with analyst output cost since the analyst dominates spend
-(judge is amortized — same Opus across arms; extractor is cheap Haiku).
+Estimates assume the same 91-run grid + 8-question rubric. Most spend lands
+on the JUDGE (Opus 4.7 max-effort, held constant across arms) — not the
+analyst. The analyst's family only swings the analyst-side fraction.
 
-| Arm        | Estimate | Driver |
-| ---------- | -------- | ------ |
-| opus-4-7   | $582 (actual) | Opus output @ $75/M, 91 long thinking traces |
-| sonnet-4-6 | ~$80 | Sonnet @ $15/M output, similar token volume |
-| haiku-4-5  | ~$20 | Haiku @ $4/M output, smaller context = fewer tokens |
+| Arm        | Full-run estimate | Driver                                              |
+| ---------- | ----------------- | --------------------------------------------------- |
+| opus-4-7   | $582 (actual)     | Opus analyst @ $75/M output, 91 long thinking runs  |
+| sonnet-4-6 | ~$300-350         | Sonnet analyst @ $15/M output (~5× cheaper)         |
+| haiku-4-5  | ~$260-280         | Haiku analyst @ $4/M, smaller 200K context per call |
 
-Judge spend is shared overhead — about $246 of the Opus arm's $582 went to
-the judge. New arms only pay for analyst tokens; extractor and judge
-re-runs over the new arm's records add ~$50–100.
+Judge (Opus 4.7 primary + Sonnet 4.6 secondary subsample + Opus pairwise)
+contributes ~$246 of the Opus arm's $582. That floor applies to every arm
+because the judge config is identical.
+
+**Always run `python -m scripts.dry_run --arm <arm>` for a fresh estimate
+before kicking off** — pricing can change, and the dry-run output reflects
+the actual base.yaml + arm overlay you're about to run.

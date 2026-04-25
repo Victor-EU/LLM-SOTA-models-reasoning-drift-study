@@ -1,9 +1,11 @@
 """
 Cost tracker. Converts API usage into dollars and enforces the budget hard-stop.
 
-Pricing is looked up by model-family key in `cfg.cost.pricing`. The analyst
-and secondary judge share the `opus_4_7` family; the primary judge is
-`sonnet_4_6`; the extractor is `haiku_4_5`.
+Pricing is looked up at record time by model-family key in `cfg.cost.pricing`,
+mapped from the actual snapshot via `cfg.model_family(snapshot)`. This is
+multi-arm safe: the analyst's family varies per arm (opus_4_7 / sonnet_4_6 /
+haiku_4_5); judge_primary is opus_4_7, judge_secondary is sonnet_4_6, and the
+extractor is haiku_4_5 — all held constant across arms.
 """
 from __future__ import annotations
 

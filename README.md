@@ -15,11 +15,16 @@ Three analyst arms are configured. Only the analyst varies between arms;
 methodology, prompts, rubric, materials, judge, and extractor are held
 constant.
 
-| Arm                        | Status        | Spend     | Notes                                      |
-| -------------------------- | ------------- | --------- | ------------------------------------------ |
-| **Opus 4.7** (max effort)  | LOCKED        | $582.33   | 91/91/91 runs. Original lock arm.          |
-| **Sonnet 4.6** (max effort)| Configured    | est. ~$80 | Not yet run. Verify thinking schema first. |
-| **Haiku 4.5** (max effort) | Configured    | est. ~$20 | Not yet run. Verify thinking + ctx window. |
+| Arm                        | Status        | Spend          | Notes                                      |
+| -------------------------- | ------------- | -------------- | ------------------------------------------ |
+| **Opus 4.7** (max effort)  | LOCKED        | $582.33 actual | 91/91/91 runs. Original lock arm.          |
+| **Sonnet 4.6** (max effort)| Configured    | est. ~$300-350 | Not yet run. Verify thinking schema first. |
+| **Haiku 4.5** (max effort) | Configured    | est. ~$260-280 | Not yet run. Verify thinking + ctx window. |
+
+(Estimates: judge spend (~$246) is shared across arms; analyst-side spend
+varies with the per-token pricing of the analyst model. Run
+`python -m scripts.dry_run --arm <arm>` for a fresh estimate against current
+pricing before kicking off a new arm.)
 
 ## Layout
 

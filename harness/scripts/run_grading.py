@@ -6,7 +6,7 @@ Opus 4.7 absolute judge (cached target materials), with deterministic
 subsamples going to Sonnet 4.6 secondary (ICC) and Opus pairwise (vs baseline).
 
 Usage:
-    python -m scripts.run_grading
+    python -m scripts.run_grading --arm opus-4-7
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ from dotenv import load_dotenv
 HARNESS_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HARNESS_ROOT))
 
-from src.config import load_config  # noqa: E402
+from src.config import load_arm_config  # noqa: E402
 from src.cost import CostTracker  # noqa: E402
 from src.judge import run_grade_stage  # noqa: E402
 from src.manifest import Manifest  # noqa: E402
@@ -33,11 +33,11 @@ from src.persistence import WriterCache  # noqa: E402
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default=str(HARNESS_ROOT / "config" / "experiment.yaml"))
+    parser.add_argument("--arm", required=True, help="analyst arm name (config/arms/<arm>.yaml)")
     args = parser.parse_args()
 
     load_dotenv()
-    cfg = load_config(args.config)
+    cfg = load_arm_config(args.arm)
     logging.basicConfig(level=cfg.observability.log_level,
                         format="%(asctime)s %(levelname)-5s %(name)s %(message)s")
     log = logging.getLogger("run_grading")

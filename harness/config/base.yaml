@@ -1,0 +1,133 @@
+# Base configuration shared across ALL analyst arms.
+# Per-arm overrides live in config/arms/<arm>.yaml and are deep-merged on top
+# of this file. The arm yaml MUST define `arm.name` and `models.analyst`;
+# everything else here applies unless the arm explicitly overrides it.
+#
+# Pre-registration hash is over DESIGN.md + PROMPTS.md + RUBRIC.md and is
+# IDENTICAL across arms — the methodology does not change between Opus 4.7,
+# Sonnet 4.6, and Haiku 4.5 runs. Only the analyst snapshot varies.
+
+experiment:
+  name: "opus-4.7-reasoning-drift"
+  version: "0.3-multiarm"
+  # SHA-256 of DESIGN.md + PROMPTS.md + RUBRIC.md (concatenated as raw bytes).
+  # Locked 2026-04-25. Reproducible via:
+  #   python3 -c "import hashlib; print(hashlib.sha256(b''.join(open(f, 'rb').read() for f in ['DESIGN.md','PROMPTS.md','RUBRIC.md'])).hexdigest())"
+  pre_registration_hash: "61b2d30f0c741bd96f24159fedc814276df565de317f780e117a3c7e32100419"
+
+# ------------------------------------------------------------------
+# Models — extractor and judges are HELD CONSTANT across arms.
+# The analyst block lives in the per-arm yaml.
+# ------------------------------------------------------------------
+models:
+  extractor:
+    # Mechanical normalization — held constant so extraction noise doesn't
+    # confound cross-arm analyst comparisons.
+    snapshot: "claude-haiku-4-5-20251001"
+    max_output_tokens: 16384
+    temperature: 1.0
+    thinking_effort: null
+  judge_primary:
+    # The judge is the measuring instrument. Held constant across all arms
+    # so observed differences come from the analyst, not the judge. Same model
+    # as the Opus 4.7 analyst is acceptable because judging happens on cached
+    # target materials at fill=0 — no within-judge drift confound.
+    snapshot: "claude-opus-4-7"
+    max_output_tokens: 16384
+    temperature: 1.0
+    thinking_effort: "max"
+  judge_secondary:
+    # 20% subsample for cross-model rubric-application reliability (ICC).
+    # Not a correctness check — a consistency check on rubric interpretation.
+    snapshot: "claude-sonnet-4-6"
+    max_output_tokens: 8192
+    temperature: 1.0
+    thinking_effort: "high"
+
+# ------------------------------------------------------------------
+# Design grid — IDENTICAL across arms so cells line up cell-by-cell.
+# Per-arm yaml may override `tokens.total_context_target` if the analyst's
+# context window is smaller (e.g., Haiku 4.5 at 200K instead of 1M).
+# ------------------------------------------------------------------
+design:
+  fill_levels: [0.00, 0.25, 0.50, 0.75, 0.95]
+  positions: [start, middle, end]
+  noise_types: [peer_materials]
+  reports: [MSFT]
+  reps_per_cell: 7
+
+pilot:
+  cells:
+    - {report: MSFT, fill: 0.00, position: null, noise: null}
+    - {report: MSFT, fill: 0.50, position: middle, noise: peer_materials}
+    - {report: MSFT, fill: 0.95, position: middle, noise: peer_materials}
+
+# ------------------------------------------------------------------
+# Token budgeting. total_context_target is overridden per-arm if needed.
+# ------------------------------------------------------------------
+tokens:
+  total_context_target: 1000000
+  safety_margin_pct: 0.02
+  fill_tolerance_tokens: 500
+  report_token_cap: 130000
+  max_budget_adjustment_iterations: 5
+
+# ------------------------------------------------------------------
+# Execution — same parallelism and retry policy across arms.
+# ------------------------------------------------------------------
+execution:
+  max_concurrent_cells: 4
+  max_concurrent_extract: 16
+  max_concurrent_judge: 16
+  retry:
+    max_attempts: 6
+    base_delay_seconds: 30
+    max_delay_seconds: 600
+  cache_ttl_seconds: 280
+  per_run_timeout_seconds: 1800
+
+# ------------------------------------------------------------------
+# Paths — `{arm}` is substituted at load time with the arm name.
+# Materials are SHARED across arms (same corpus, same ground truth).
+# ------------------------------------------------------------------
+paths:
+  materials_dir: "../materials"
+  materials_lock: "../materials/materials.lock.json"
+  data_dir: "../arms/{arm}/data"
+  manifest_db: "../arms/{arm}/data/manifest.sqlite"
+  raw_dir: "../arms/{arm}/data/raw"
+  extracted_dir: "../arms/{arm}/data/extracted"
+  graded_dir: "../arms/{arm}/data/graded"
+  logs_dir: "../arms/{arm}/data/logs"
+
+# ------------------------------------------------------------------
+# Cost guard. Per-arm budget is the same; the arm yaml may override.
+# ------------------------------------------------------------------
+cost:
+  budget_usd: 700.0
+  hard_stop_usd: 850.0
+  pricing:
+    # USD per million tokens.
+    opus_4_7:
+      input: 15.00
+      output: 75.00
+      cache_read: 1.50
+      cache_write: 18.75
+    sonnet_4_6:
+      input: 3.00
+      output: 15.00
+      cache_read: 0.30
+      cache_write: 3.75
+    haiku_4_5:
+      input: 0.80
+      output: 4.00
+      cache_read: 0.08
+      cache_write: 1.00
+
+# ------------------------------------------------------------------
+# Observability.
+# ------------------------------------------------------------------
+observability:
+  log_level: INFO
+  persist_raw_prompts: true
+  persist_thinking_blocks: true

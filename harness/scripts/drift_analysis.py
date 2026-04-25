@@ -1,22 +1,28 @@
 """Drift analysis on graded data.
 
-Aggregates judge scores + autograde results per cell and per fill level.
+Aggregates judge scores + autograde results per cell and per fill level
+for ONE arm. For cross-arm comparison see scripts/compare_arms.py.
+
 Surfaces:
   - Tier 1/2 numeric accuracy + distractor (cross-contamination) rate by fill.
   - Tier 3 dimension means + variance by fill, by question.
   - reasoning_quality (0-10) drift across fill levels.
   - Q8 structural diagnostics (units_decomposed, frameworks_applied, synthesis_consistent).
   - Pairwise verdict distribution and reasoning_quality_delta vs baseline.
-  - Cross-model ICC from Sonnet secondary subsample.
+  - Cross-model ICC from Sonnet secondary subsample (within-arm).
+
+Usage:
+  python -m scripts.drift_analysis --arm opus-4-7
 """
 from __future__ import annotations
 
+import argparse
 import json
 import statistics
 from collections import defaultdict
 from pathlib import Path
 
-HARNESS = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def fmt_mean_sd(vals, prec=2):
@@ -28,11 +34,22 @@ def fmt_mean_sd(vals, prec=2):
 
 
 def main() -> int:
-    graded_dir = HARNESS / "data/graded"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--arm", required=True, help="analyst arm name (matches arms/<arm>/)")
+    args = parser.parse_args()
+
+    graded_dir = PROJECT_ROOT / "arms" / args.arm / "data" / "graded"
+    if not graded_dir.exists():
+        print(f"no graded directory at {graded_dir} — has this arm been graded yet?")
+        return 2
     files = sorted(graded_dir.glob("*.jsonl"))
     if not files:
-        print("no graded files found — run scripts.run_grading first")
+        print(f"no graded files in {graded_dir} — run scripts.run_grading --arm {args.arm} first")
         return 2
+
+    print(f"Drift analysis for arm: {args.arm}")
+    print(f"Reading from: {graded_dir.relative_to(PROJECT_ROOT)}")
+    print()
 
     # Group by cell_id, then by q_id.
     by_cell: dict[str, dict] = defaultdict(lambda: {

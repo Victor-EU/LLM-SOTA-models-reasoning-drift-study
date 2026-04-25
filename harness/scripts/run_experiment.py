@@ -2,9 +2,13 @@
 Main entrypoint — collect stage.
 
 Usage:
-    python -m scripts.run_experiment --pilot           # only pilot cells
-    python -m scripts.run_experiment --full            # full grid
-    python -m scripts.run_experiment --cell <cell_id>  # single cell
+    python -m scripts.run_experiment --arm opus-4-7 --pilot           # pilot cells
+    python -m scripts.run_experiment --arm opus-4-7 --full            # full grid
+    python -m scripts.run_experiment --arm opus-4-7 --cell <cell_id>  # single cell
+
+The --arm flag selects which analyst arm to run. Per-arm config lives at
+config/arms/<arm>.yaml and is overlaid on config/base.yaml. Output goes to
+arms/<arm>/data/. See ARMS.md for the integrity model.
 """
 from __future__ import annotations
 
@@ -22,7 +26,7 @@ HARNESS_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HARNESS_ROOT))
 
 from src.cells import CellSpec, filter_to_pilot, generate_cells, summarize  # noqa: E402
-from src.config import load_config  # noqa: E402
+from src.config import load_arm_config  # noqa: E402
 from src.cost import CostTracker  # noqa: E402
 from src.manifest import Manifest  # noqa: E402
 from src.materials import load_materials  # noqa: E402
@@ -32,7 +36,7 @@ from src.runner import run_collect_stage  # noqa: E402
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default=str(HARNESS_ROOT / "config" / "experiment.yaml"))
+    parser.add_argument("--arm", required=True, help="analyst arm name (config/arms/<arm>.yaml)")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--pilot", action="store_true", help="only run pilot cells")
     mode.add_argument("--full", action="store_true", help="run the full design grid")
@@ -40,7 +44,7 @@ def main() -> int:
     args = parser.parse_args()
 
     load_dotenv()
-    cfg = load_config(args.config)
+    cfg = load_arm_config(args.arm)
     logging.basicConfig(
         level=cfg.observability.log_level,
         format="%(asctime)s %(levelname)-5s %(name)s %(message)s",

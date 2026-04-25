@@ -1,0 +1,24 @@
+# Sonnet 4.6 analyst arm — comparison arm.
+#
+# Tests whether the drift profile observed for Opus 4.7 reproduces in a
+# smaller, faster model running at the same `effort=max` adaptive thinking.
+# All other variables (extractor, judge, prompts, materials, design grid,
+# noise pool, seeds) are held identical via base.yaml.
+#
+# VERIFICATION CHECKLIST before kicking off this arm:
+#   - [ ] Confirm Sonnet 4.6 accepts `thinking.type.adaptive` with effort=max
+#         (run scripts/probe_effort.py adapted for Sonnet snapshot).
+#   - [ ] Confirm 1M context window is GA on Sonnet 4.6 snapshot string used
+#         here. If only 200K, override tokens.total_context_target below.
+
+arm:
+  name: sonnet-4-6
+  description: "Sonnet 4.6 with adaptive extended thinking at max effort."
+
+models:
+  analyst:
+    snapshot: "claude-sonnet-4-6"
+    context_window: 1000000   # VERIFY: confirm 1M context GA on this snapshot
+    thinking_effort: "max"
+    max_output_tokens: 32768
+    temperature: 1.0

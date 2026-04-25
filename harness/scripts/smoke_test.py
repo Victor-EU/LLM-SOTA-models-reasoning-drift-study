@@ -28,18 +28,18 @@ sys.path.insert(0, str(HARNESS_ROOT))
 
 from src.api import run_analyst  # noqa: E402
 from src.cells import RunSpec, generate_cells, make_run_id  # noqa: E402
-from src.config import load_config  # noqa: E402
+from src.config import load_arm_config  # noqa: E402
 from src.materials import load_materials  # noqa: E402
 from src.tokens import resolve_budget  # noqa: E402
 from src.validation import validate_run  # noqa: E402
 
 
-async def smoke(cell_fill: float) -> int:
+async def smoke(arm: str, cell_fill: float) -> int:
     load_dotenv()
     logging.basicConfig(level="INFO", format="%(asctime)s %(levelname)s %(name)s %(message)s")
     log = logging.getLogger("smoke")
 
-    cfg = load_config(HARNESS_ROOT / "config" / "experiment.yaml")
+    cfg = load_arm_config(arm)
     materials = load_materials(cfg.paths.materials_dir, cfg.paths.materials_lock)
 
     cells = generate_cells(cfg)
@@ -137,10 +137,11 @@ async def smoke(cell_fill: float) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--arm", required=True, help="analyst arm name (config/arms/<arm>.yaml)")
     parser.add_argument("--cell-fill", type=float, default=0.0,
                         help="fill_pct of cell to test (default 0.0 = baseline)")
     args = parser.parse_args()
-    return asyncio.run(smoke(args.cell_fill))
+    return asyncio.run(smoke(args.arm, args.cell_fill))
 
 
 if __name__ == "__main__":

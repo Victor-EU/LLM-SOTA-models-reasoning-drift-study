@@ -43,7 +43,7 @@ from src.materials import Materials, load_materials  # noqa: E402
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default=str(HARNESS_ROOT / "config" / "experiment.yaml"))
+    parser.add_argument("--arm", required=True, help="analyst arm name (config/arms/<arm>.yaml)")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--grid", action="store_true", help="summarize design grid + cost estimate (default)")
     mode.add_argument(
@@ -56,7 +56,7 @@ def main() -> int:
 
     load_dotenv()
     logging.basicConfig(level="INFO", format="%(message)s")
-    cfg = load_config(args.config)
+    cfg = load_arm_config(args.arm)
 
     print(f"experiment: {cfg.name} v{cfg.version}")
     print(f"config hash: {cfg.config_sha256[:12]}")

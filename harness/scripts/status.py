@@ -2,7 +2,7 @@
 Inspect the manifest and print experiment progress.
 
 Usage:
-    python -m scripts.status
+    python -m scripts.status --arm opus-4-7
 """
 from __future__ import annotations
 
@@ -13,19 +13,19 @@ from pathlib import Path
 HARNESS_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HARNESS_ROOT))
 
-from src.config import load_config  # noqa: E402
+from src.config import load_arm_config  # noqa: E402
 from src.manifest import Manifest, Stage  # noqa: E402
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default=str(HARNESS_ROOT / "config" / "experiment.yaml"))
+    parser.add_argument("--arm", required=True, help="analyst arm name (config/arms/<arm>.yaml)")
     args = parser.parse_args()
 
-    cfg = load_config(args.config)
+    cfg = load_arm_config(args.arm)
     manifest = Manifest(cfg.paths.manifest_db)
 
-    print(f"experiment: {cfg.name} v{cfg.version}")
+    print(f"experiment: {cfg.name} v{cfg.version} (arm={cfg.arm_name})")
     config_sha = manifest.get_meta("config_sha256")
     pre_reg = manifest.get_meta("pre_registration_hash")
     lock = manifest.get_meta("materials_lock_sha256")

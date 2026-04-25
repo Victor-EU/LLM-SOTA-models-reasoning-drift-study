@@ -1,9 +1,16 @@
 """
 Experiment config loader.
 
-Loads config/experiment.yaml into strongly-typed dataclasses. Validates only
-the invariants that the harness itself depends on — design-level assumptions
-(e.g., 15 questions per report) are validated downstream in materials.py.
+Primary entry point: load_arm_config(arm_name). Loads config/base.yaml and
+config/arms/<arm_name>.yaml, deep-merges them, substitutes the arm name into
+path templates, and returns a strongly-typed ExperimentConfig.
+
+Legacy entry: load_config(path) loads a single fully-formed YAML file. Used
+by tests and ad-hoc tooling.
+
+Validates only the invariants the harness itself depends on — design-level
+assumptions (e.g., 15 questions per report) are validated downstream in
+materials.py.
 """
 from __future__ import annotations
 
@@ -141,6 +148,7 @@ class ExperimentConfig:
     name: str
     version: str
     pre_registration_hash: str
+    arm_name: str                    # which analyst arm — drives output paths
     config_path: Path
     config_sha256: str
     models: ModelsConfig
@@ -182,17 +190,102 @@ def _opt_effort(v: Any) -> str | None:
     return s
 
 
+def _deep_merge(base: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]:
+    """Recursively merge `overlay` into a copy of `base`. Leaf values from
+    overlay replace base. Lists are replaced (not concatenated)."""
+    out = dict(base)
+    for key, val in overlay.items():
+        if key in out and isinstance(out[key], dict) and isinstance(val, dict):
+            out[key] = _deep_merge(out[key], val)
+        else:
+            out[key] = val
+    return out
+
+
+def _substitute_arm_in_paths(paths: dict[str, Any], arm_name: str) -> dict[str, Any]:
+    """Replace `{arm}` placeholder in path strings with the arm name."""
+    return {k: (v.replace("{arm}", arm_name) if isinstance(v, str) else v)
+            for k, v in paths.items()}
+
+
+def load_arm_config(arm_name: str, config_root: Path | str | None = None) -> ExperimentConfig:
+    """Load harness/config/base.yaml + harness/config/arms/{arm_name}.yaml,
+    deep-merge them, substitute {arm} in path strings, and return the
+    resulting ExperimentConfig.
+
+    The merged config's SHA-256 hash is computed over the concatenation
+    `<base.yaml bytes>\\n---\\n<arm.yaml bytes>` so reproducing the same hash
+    requires both files unchanged.
+    """
+    if config_root is None:
+        config_root = Path(__file__).resolve().parents[1] / "config"
+    config_root = Path(config_root).resolve()
+    base_path = config_root / "base.yaml"
+    arm_path = config_root / "arms" / f"{arm_name}.yaml"
+
+    if not base_path.exists():
+        raise FileNotFoundError(f"missing base config: {base_path}")
+    if not arm_path.exists():
+        raise FileNotFoundError(f"missing arm config: {arm_path}")
+
+    base_text = base_path.read_text(encoding="utf-8")
+    arm_text = arm_path.read_text(encoding="utf-8")
+    base_raw = yaml.safe_load(base_text)
+    arm_raw = yaml.safe_load(arm_text)
+
+    if not arm_raw or "arm" not in arm_raw or "name" not in arm_raw["arm"]:
+        raise ValueError(f"{arm_path}: must declare arm.name at top level")
+    declared_name = arm_raw["arm"]["name"]
+    if declared_name != arm_name:
+        raise ValueError(
+            f"{arm_path}: arm.name={declared_name!r} does not match requested arm {arm_name!r} — "
+            f"file path and declared name must agree"
+        )
+
+    merged = _deep_merge(base_raw, arm_raw)
+    if "paths" in merged:
+        merged["paths"] = _substitute_arm_in_paths(merged["paths"], arm_name)
+
+    combined_text = base_text + "\n---\n# arm overlay:\n" + arm_text
+    sha = hashlib.sha256(combined_text.encode("utf-8")).hexdigest()
+
+    # Resolve paths relative to harness/ (one level up from config/).
+    base_dir = config_root.parent
+    return _build_config(merged, sha, arm_path, arm_name, base_dir)
+
+
 def load_config(path: str | Path) -> ExperimentConfig:
+    """Load a single-file experiment config (legacy / direct-loading mode).
+
+    Intended for tests and ad-hoc scripts that want to pass a fully-formed
+    YAML file without going through arm-overlay merging. Production scripts
+    should use load_arm_config(arm_name) instead.
+
+    The arm name is read from the yaml's `arm.name` field; if absent, defaults
+    to "default" and a warning is logged.
+    """
     path = Path(path).resolve()
     text = path.read_text(encoding="utf-8")
     sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
     raw: dict[str, Any] = yaml.safe_load(text)
 
-    # Paths in the YAML are documented as "relative to harness/" (one level up from config/).
-    base = path.parent.parent
+    arm_name = raw.get("arm", {}).get("name", "default") if isinstance(raw.get("arm"), dict) else "default"
+    if "paths" in raw:
+        raw["paths"] = _substitute_arm_in_paths(raw["paths"], arm_name)
 
+    base_dir = path.parent.parent
+    return _build_config(raw, sha, path, arm_name, base_dir)
+
+
+def _build_config(
+    raw: dict[str, Any],
+    sha: str,
+    config_path: Path,
+    arm_name: str,
+    base_dir: Path,
+) -> ExperimentConfig:
     def resolve(p: str) -> Path:
-        return (base / p).resolve()
+        return (base_dir / p).resolve()
 
     models = ModelsConfig(
         analyst=AnalystModelConfig(
@@ -298,7 +391,8 @@ def load_config(path: str | Path) -> ExperimentConfig:
         name=raw["experiment"]["name"],
         version=raw["experiment"]["version"],
         pre_registration_hash=raw["experiment"]["pre_registration_hash"],
-        config_path=path,
+        arm_name=arm_name,
+        config_path=config_path,
         config_sha256=sha,
         models=models,
         design=design,
@@ -314,6 +408,8 @@ def load_config(path: str | Path) -> ExperimentConfig:
 
 
 def _validate(cfg: ExperimentConfig) -> None:
+    if not cfg.arm_name or "/" in cfg.arm_name or cfg.arm_name.startswith("."):
+        raise ValueError(f"invalid arm_name {cfg.arm_name!r} — must be filename-safe")
     if cfg.tokens.fill_tolerance_tokens <= 0:
         raise ValueError("fill_tolerance_tokens must be positive")
     if cfg.design.reps_per_cell < 2:

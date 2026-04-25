@@ -1,0 +1,23 @@
+# Opus 4.7 analyst arm — the original locked arm.
+#
+# This arm corresponds to arms/opus-4-7/data/ (91 runs, 720 extracted, 728
+# graded) and arms/opus-4-7/reports/FINAL_REPORT.md. The arm.lock.json in
+# that directory pins this configuration.
+
+arm:
+  name: opus-4-7
+  description: "Opus 4.7 with adaptive extended thinking at max effort. Original lock arm."
+
+models:
+  analyst:
+    # Opus 4.7 requires `thinking.type.adaptive` + `output_config.effort`
+    # where effort ∈ {low, medium, high, xhigh, max}. "max" is the deepest
+    # reasoning setting available — confirmed via scripts/probe_effort.py.
+    # 1M context is GA; no anthropic-beta header required.
+    snapshot: "claude-opus-4-7"
+    context_window: 1000000
+    thinking_effort: "max"
+    # With thinking_effort=max, thinking tokens count toward max_output_tokens.
+    # 32K gives ~24K headroom for thinking plus the JSON body for 8 answers.
+    max_output_tokens: 32768
+    temperature: 1.0

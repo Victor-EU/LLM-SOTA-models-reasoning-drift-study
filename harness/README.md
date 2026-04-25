@@ -1,41 +1,49 @@
-# Harness (v0.2 simplified)
+# Harness (v0.3 — multi-arm)
 
-Executes the experiment described in `../DESIGN.md`. Produces a JSONL dump of
-**91 analyst runs** (13 cells × 7 reps) plus extractor and judge outputs, from
-which the pre-registered analysis is computed.
+Executes the experiment described in `../DESIGN.md` for any single analyst
+arm. Produces a JSONL dump of **91 analyst runs** (13 cells × 7 reps) plus
+extractor and judge outputs, written under `../arms/<arm>/data/`.
+
+The Opus 4.7 arm is locked. Sonnet 4.6 and Haiku 4.5 arms are configured
+but not yet executed — see `../ARMS.md` for the cross-arm integrity model.
 
 ## Layout
 
-- `config/experiment.yaml` — frozen pre-registered configuration.
+- `config/base.yaml` — shared design grid, extractor, judge, paths (with
+  `{arm}` placeholder), pricing. Held constant across arms.
+- `config/arms/<arm>.yaml` — per-arm analyst overrides (snapshot, thinking
+  effort, context window). Deep-merged onto base at load time.
 - `src/` — pipeline modules. Each module header documents its contract.
-- `scripts/` — CLI entrypoints.
-- `data/` — created at runtime. Manifest, raw responses, extracted JSON,
-  judge scores, logs.
+- `scripts/` — CLI entrypoints. All take `--arm <arm-name>`.
+- `../arms/<arm>/data/` — per-arm outputs. Manifest, raw responses,
+  extracted JSON, judge scores, logs.
 
 ## Pipeline stages
 
-| Stage   | Script                        | Output                                   |
-| ------- | ----------------------------- | ---------------------------------------- |
-| Collect | `scripts/run_experiment.py`   | `data/raw/<cell_id>.jsonl`               |
-| Extract | `scripts/run_extractor.py`    | `data/extracted/<cell_id>.jsonl`         |
-| Grade   | `scripts/run_grading.py`      | `data/graded/<cell_id>.jsonl`            |
-| Analyze | (separate R notebook)         | `../analysis/*.Rmd`                      |
+| Stage   | Script                        | Output                                                    |
+| ------- | ----------------------------- | --------------------------------------------------------- |
+| Collect | `scripts/run_experiment.py`   | `../arms/<arm>/data/raw/<cell_id>.jsonl`                  |
+| Extract | `scripts/run_extractor.py`    | `../arms/<arm>/data/extracted/<cell_id>.jsonl`            |
+| Grade   | `scripts/run_grading.py`      | `../arms/<arm>/data/graded/<cell_id>.jsonl`               |
+| Analyze | `scripts/drift_analysis.py`   | stdout / `../arms/<arm>/reports/`                         |
+| Compare | `scripts/compare_arms.py`     | `../cross_arm/COMPARATIVE_REPORT.md`                      |
 
-Each stage is **resumable and idempotent**. `data/manifest.sqlite` is the
-single source of truth for run state.
+Each stage is **resumable and idempotent**. `<arm>/data/manifest.sqlite` is
+the single source of truth for run state within an arm.
 
-## First-run flow
+## First-run flow (per arm)
 
 ```
 uv sync
-cp .env.example .env                            # add ANTHROPIC_API_KEY
-python -m scripts.dry_run                       # validate + cost estimate
-python -m scripts.run_experiment --pilot        # 3 cells × 7 = 21 runs, ~$50
+cp .env.example .env                                       # add ANTHROPIC_API_KEY
+python -m scripts.dry_run --arm <arm>                      # validate + cost estimate
+python -m scripts.run_experiment --arm <arm> --pilot       # 3 cells × 7 = 21 runs, ~$50
 # gate: review pilot, decide go/no-go per DESIGN §11
-python -m scripts.run_experiment --full         # 13 cells × 7 = 91 runs
-python -m scripts.run_extractor
-python -m scripts.run_grading
-python -m scripts.status
+python -m scripts.run_experiment --arm <arm> --full        # 13 cells × 7 = 91 runs
+python -m scripts.run_extractor --arm <arm>
+python -m scripts.run_grading --arm <arm>
+python -m scripts.status --arm <arm>
+python -m scripts.drift_analysis --arm <arm>
 ```
 
 ## Budget

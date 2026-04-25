@@ -1,22 +1,25 @@
 """Drift signal sanity check — pre-judge analysis of the collected data.
 
-Aggregates per-cell metrics from data/raw and data/extracted to verify that:
+Aggregates per-cell metrics from arms/<arm>/data/raw and .../extracted to verify that:
 1. The experiment captured a usable signal at each fill level.
 2. Tier-1 numeric accuracy is measurable against ground truth.
 3. Tier-1 cross-contamination from peer 10-Ks is detectable.
 4. Output length / thinking depth varies with fill level.
 
-This is NOT the judge stage — that's still NotImplementedError. This script
-just establishes whether the *raw* data has drift signal worth grading.
+This is NOT the judge stage — for graded analysis use scripts.drift_analysis.
+
+Usage:
+  python -m scripts.quick_analysis --arm opus-4-7
 """
 from __future__ import annotations
 
+import argparse
 import json
 import statistics
 from collections import defaultdict
 from pathlib import Path
 
-HARNESS = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 # Canonical MSFT FY2025 ground-truth (from 10-K, double-checked in smoke test).
 TRUTH = {
@@ -55,8 +58,17 @@ def num_or_none(s):
 
 
 def main() -> int:
-    raw_dir = HARNESS / "data/raw"
-    ext_dir = HARNESS / "data/extracted"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--arm", required=True, help="analyst arm name (matches arms/<arm>/)")
+    args = parser.parse_args()
+
+    arm_data = PROJECT_ROOT / "arms" / args.arm / "data"
+    raw_dir = arm_data / "raw"
+    ext_dir = arm_data / "extracted"
+    if not raw_dir.exists():
+        print(f"no data at {arm_data} — has this arm been run?")
+        return 2
+    print(f"Quick analysis for arm: {args.arm}")
 
     # Index raw records by run_id for usage/length metrics.
     raw: dict[str, dict] = {}

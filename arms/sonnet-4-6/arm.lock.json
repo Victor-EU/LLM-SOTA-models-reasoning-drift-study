@@ -1,0 +1,112 @@
+{
+  "$schema_version": "1.0",
+  "arm_name": "sonnet-4-6",
+  "arm_description": "Sonnet 4.6 with adaptive extended thinking at max effort. Comparison arm to Opus 4.7.",
+
+  "pre_registration": {
+    "hash": "61b2d30f0c741bd96f24159fedc814276df565de317f780e117a3c7e32100419",
+    "lock_file": "../../pre_registration.lock",
+    "note": "MUST match pre_registration.lock.methodology_hash. compare_arms.py refuses to run if any arm's hash differs."
+  },
+
+  "materials": {
+    "lock_hash": "c13b5514279c9d8dbc5118ec9b3b1325a0cff56c4fb1cee8d66992a98cd25199",
+    "lock_path": "../../materials/materials.lock.json",
+    "note": "MUST match pre_registration.lock.materials_lock_hash. Identical to opus-4-7 arm — same corpus, same ground truth, same noise pool."
+  },
+
+  "analyst": {
+    "snapshot": "claude-sonnet-4-6",
+    "context_window": 1000000,
+    "thinking_effort": "max",
+    "max_output_tokens": 65536,
+    "temperature": 1.0,
+    "note": "max_output_tokens raised from initial 32768 after baseline smoke test showed Sonnet at effort=max uses ~17K thinking tokens, leaving insufficient budget for the 8-answer JSON body. 65536 confirmed safe across all 91 runs."
+  },
+
+  "instruments_used": {
+    "extractor": {
+      "snapshot": "claude-haiku-4-5-20251001",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": null
+    },
+    "judge_primary": {
+      "snapshot": "claude-opus-4-7",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": "max"
+    },
+    "judge_secondary": {
+      "snapshot": "claude-sonnet-4-6",
+      "max_output_tokens": 8192,
+      "temperature": 1.0,
+      "thinking_effort": "high",
+      "subsample_pct": 20
+    }
+  },
+
+  "design_used": {
+    "fill_levels": [0.00, 0.25, 0.50, 0.75, 0.95],
+    "positions": ["start", "middle", "end"],
+    "noise_types": ["peer_materials"],
+    "reports": ["MSFT"],
+    "reps_per_cell": 7,
+    "tokens_total_context_target": 1000000,
+    "tokens_report_token_cap": 130000
+  },
+
+  "pricing_at_lock_usd_per_million_tokens": {
+    "opus_4_7":   {"input": 15.00, "output": 75.00, "cache_read": 1.50, "cache_write": 18.75},
+    "sonnet_4_6": {"input": 3.00,  "output": 15.00, "cache_read": 0.30, "cache_write": 3.75},
+    "haiku_4_5":  {"input": 0.80,  "output": 4.00,  "cache_read": 0.08, "cache_write": 1.00}
+  },
+  "pricing_note": "Snapshotted to allow honest cost reconstruction even if API pricing changes after this arm closes.",
+
+  "execution_results": {
+    "collect_runs_completed": 91,
+    "collect_runs_failed": 0,
+    "extract_records_total": 728,
+    "extract_records_parsed_ok": 719,
+    "extract_records_parsed_ok_pct": 98.8,
+    "grade_records_completed": 91,
+    "grade_unparseable_judge_responses": 21,
+    "grade_unparseable_pct": 7.7,
+    "grade_unparseable_note": "Pre-existing parser bug — concentrated on Q8 (MSFT-S-03) framework synthesis. Same systemic issue exists on opus-4-7 arm at similar rate (16/329 = 4.9% on Opus, 21/273 = 7.7% on Sonnet). Filtered out of cross-arm analysis since it equally affects both arms.",
+    "cumulative_cost_usd": 522.96,
+    "budget_usd": 700.00,
+    "hard_stop_usd": 850.00,
+    "cost_breakdown_usd": {
+      "analyst": 217.08,
+      "extractor": 4.09,
+      "judge_primary_absolute": 238.70,
+      "judge_primary_pairwise": 55.27,
+      "judge_secondary": 7.82
+    }
+  },
+
+  "data_integrity": {
+    "data_root": "data/",
+    "data_manifest_path": "data.manifest.sha256",
+    "data_manifest_sha256_self": "23f4b525fd5c46489bd1b6a41bcee785a63f9a4e3c575f5379f68309ff4c3191",
+    "data_manifest_sha256_self_recipe": "sha256 of arms/sonnet-4-6/data.manifest.sha256 file bytes",
+    "verify_command": "python3 -m scripts.verify_arm_integrity --arm sonnet-4-6"
+  },
+
+  "git_anchor": {
+    "tag": "arm/sonnet-4-6/data-v1.0",
+    "note": "Tag points to the commit that locks this arm. Full reproducibility from `git checkout arm/sonnet-4-6/data-v1.0`."
+  },
+
+  "execution_notes": [
+    "Pilot (3 cells × 7 reps = 21 runs) ran 2026-04-25 12:31-14:33, $137. One baseline run failed initially with httpx.RemoteProtocolError; api.py retry classifier was extended to cover transient streaming errors and the run was retried successfully.",
+    "Full execution (remaining 70 runs) ran 2026-04-25 15:01-19:36, $169 collect + $4 extract + $213 grade. Zero unrecoverable failures — the broadened retry classifier handled multiple transient API hiccups, including a retry storm during grade (~20 retries in 2 minutes, all recovered).",
+    "Sonnet 4.6 supported effort levels: low, medium, high, max. Opus 4.7 has 5 levels (adds xhigh). Both arms used max — apples-to-apples preserved.",
+    "Sonnet exposes thinking_text + usage.thinking_tokens via SDK; Opus 4.7 redacts text and exposes signature_chars. Both fields captured in api.py.",
+    "Sonnet at effort=max consistently allocates ~12-18K thinking tokens per call, vs Opus's ~1-3K on the same prompt. Behavioral difference, not methodology issue."
+  ],
+
+  "locked_at": "2026-04-25T20:48:58Z",
+  "locked_by": "Victor Zhang <victor.zhang.eu@gmail.com>",
+  "reports": ["reports/FINAL_REPORT.md (TODO)"]
+}

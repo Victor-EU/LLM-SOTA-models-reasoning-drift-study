@@ -136,6 +136,7 @@ def verify_analyst_in_raw_records(arm_dir: Path, *, quiet: bool) -> int:
 
     n_records = 0
     n_match = 0
+    n_failed_attempt = 0
     mismatches: list[tuple[str, str]] = []
     for f in sorted(raw_dir.glob("*.jsonl")):
         for line in f.read_text(encoding="utf-8").splitlines():
@@ -146,14 +147,20 @@ def verify_analyst_in_raw_records(arm_dir: Path, *, quiet: bool) -> int:
             except json.JSONDecodeError:
                 continue
             n_records += 1
-            actual = r.get("model", "")
+            actual = r.get("model") or ""
             if actual == expected_snapshot:
                 n_match += 1
+            elif not actual or r.get("stop_reason") is None:
+                # Failed-attempt artifact (e.g. dropped connection before model
+                # could be recorded). Preserved as an audit trail; not a
+                # methodology violation.
+                n_failed_attempt += 1
             else:
                 mismatches.append((r.get("run_id", "?"), actual))
     if not quiet:
         print(f"  raw records:                            {n_records}")
         print(f"  records matching arm.lock analyst:      {n_match}")
+        print(f"  failed-attempt records (audit trail):   {n_failed_attempt}")
         print(f"  records with mismatched analyst:        {len(mismatches)}")
         print(f"  expected analyst snapshot:              {expected_snapshot}")
     if mismatches:

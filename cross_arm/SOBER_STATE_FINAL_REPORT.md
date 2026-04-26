@@ -698,7 +698,7 @@ would say "judges disagree, here's why" — they didn't.
   to a tie at #1 with Opus, but the top-3 set was unchanged. The
   bottom of the ranking is unanimous across all four vendors —
   *the Gemini judge ranks Gemini behind DeepSeek*. Self-preference is
-  bounded: GPT +1.11 rank steps in-house (largest), Sonnet +0.39,
+  bounded: GPT +1.11 rank steps in-house (largest), Sonnet +0.38,
   Gemini +0.25, Opus +0.17 — none invert any pair. Per-arm Pearson r
   across all judge pairs ranges 0.84–1.00. The original Anthropic-only
   picture was conservative on the GPT-vs-Anthropic gap, not biased.

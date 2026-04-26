@@ -33,9 +33,10 @@ Mean rank per arm (lower is better; out of 5 candidates):
 | gemini-3-1-pro        |       4.67 |         4.76 |      4.76 |         4.48 |
 
 Three of four judges agree on the exact ordering Sonnet > Opus > GPT > DeepSeek > Gemini.
-GPT swaps Sonnet and itself (tied with Opus at 1.95) but the top-3 set is still
-{Opus, Sonnet, GPT} for every judge. **No judge inverts the bottom two**:
-Gemini is last by all four; DeepSeek is second-to-last by all four.
+The GPT judge alone moves itself from #3 to a tie at #1 with Opus (both at 1.95),
+displacing Sonnet to #3. But the top-3 set is still {Opus, Sonnet, GPT} for
+every judge. **No judge inverts the bottom two**: Gemini is last by all four;
+DeepSeek is second-to-last by all four.
 
 ## Self-preference exists but is bounded
 
@@ -45,7 +46,7 @@ three judges (positive = self-favoring):
 | judge  | self-rank | external mean | self-bias  |
 |--------|----------:|--------------:|-----------:|
 | GPT    |      1.95 |          3.06 | **+1.11**  |
-| Sonnet |      1.33 |          1.72 |  +0.39     |
+| Sonnet |      1.33 |          1.71 |  +0.38     |
 | Gemini |      4.48 |          4.73 |  +0.25     |
 | Opus   |      1.62 |          1.79 |  +0.17     |
 

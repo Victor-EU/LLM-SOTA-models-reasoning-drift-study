@@ -216,13 +216,14 @@ Anthropic-family — was closed by a cross-vendor follow-up that added
 GPT-5.5 (xhigh) and Gemini 3.1 Pro (HIGH) as judges on the same 21
 items, same permutations, $21.34 incremental spend. Three of four
 judges (Opus, Sonnet, Gemini) returned the exact ordering above; the
-GPT judge swapped Sonnet and itself to a tie at #1 with Opus but the
-top-3 set was unchanged. The bottom is unanimous: Gemini last on every
-judge, including the Gemini judge itself (which puts Gemini behind
-DeepSeek). Self-preference is bounded — GPT +1.11 rank steps in-house
-(largest), Sonnet +0.39, Gemini +0.25, Opus +0.17 — and none invert
-any pair. Per-arm Pearson r between judges ranges 0.84 – 1.00. Full
-breakdown: `SOBER_STATE_RANKING.md §10` and the standalone
+GPT judge alone moved itself from #3 to a tie at #1 with Opus,
+displacing Sonnet to #3 — but the top-3 set was unchanged. The bottom
+is unanimous: Gemini last on every judge, including the Gemini judge
+itself (which puts Gemini behind DeepSeek). Self-preference is
+bounded — GPT +1.11 rank steps in-house (largest), Sonnet +0.38,
+Gemini +0.25, Opus +0.17 — and none invert any pair. Per-arm Pearson r
+between judges ranges 0.84 – 1.00. Full breakdown:
+`SOBER_STATE_RANKING.md §10` and the standalone
 `cross_arm/sober_state/CROSS_VENDOR_JUDGE_FOLLOWUP.md`.
 
 ## Reproducing an arm

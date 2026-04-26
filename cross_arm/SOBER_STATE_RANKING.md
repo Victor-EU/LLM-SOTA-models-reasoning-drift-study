@@ -304,13 +304,14 @@ ambiguous; the Opus-judge result corroborates Sonnet's #1 standing
 The original instrument set was Anthropic-only. The follow-up in §10
 adds GPT-5.5 (xhigh) and Gemini 3.1 Pro (HIGH) as judges on the same 21
 items, same permutations. **Result:** the Sonnet > Opus > GPT > DeepSeek
-> Gemini ordering holds for 3 of 4 judges; GPT alone elevates itself to
-a tie at #1 with Opus, but the top-3 set is unchanged. The bottom of the
-ranking is unanimous (Gemini last on every judge — including the Gemini
-judge itself, which ranks Gemini behind DeepSeek). Per-arm Pearson
-correlation across all judge pairs ranges 0.84 – 1.00. Self-preference
-is bounded: GPT +1.11 rank steps in-house (the largest), Sonnet +0.39,
-Gemini +0.25, Opus +0.17. None invert any pair. Full breakdown in §10.
+> Gemini ordering holds for 3 of 4 judges; the GPT judge alone moves
+itself from #3 to a tie at #1 with Opus, displacing Sonnet to #3, but
+the top-3 set is unchanged. The bottom of the ranking is unanimous
+(Gemini last on every judge — including the Gemini judge itself, which
+ranks Gemini behind DeepSeek). Per-arm Pearson correlation across all
+judge pairs ranges 0.84 – 1.00. Self-preference is bounded: GPT +1.11
+rank steps in-house (the largest), Sonnet +0.38, Gemini +0.25, Opus
++0.17. None invert any pair. Full breakdown in §10.
 
 ### 7.4 Position bias: present but small
 
@@ -453,11 +454,12 @@ additive analysis on top of the locked main study.
 | gemini-3-1-pro        |       4.67 |         4.76 |      4.76 |         4.48 |
 
 Three of four judges produce the exact ordering Sonnet > Opus > GPT >
-DeepSeek > Gemini. The GPT judge swaps Sonnet and itself into a tie
-at #1 with Opus, but the top-3 set is unchanged. **The bottom of the
-ranking is unanimous** across all four judges: Gemini last, DeepSeek
-4th. The Gemini judge ranks Gemini-3.1-Pro behind DeepSeek-V4-Pro by
-0.29 rank steps — explicit vendor self-demotion at the bottom.
+DeepSeek > Gemini. The GPT judge alone moves itself from #3 to a tie
+at #1 with Opus, displacing Sonnet to #3 — but the top-3 set is
+unchanged. **The bottom of the ranking is unanimous** across all four
+judges: Gemini last, DeepSeek 4th. The Gemini judge ranks
+Gemini-3.1-Pro behind DeepSeek-V4-Pro by 0.29 rank steps — explicit
+vendor self-demotion at the bottom.
 
 ### 10.3 Self-preference per judge
 
@@ -467,7 +469,7 @@ mean rank assigned by the other three judges:
 | judge  | self-rank | external mean | self-bias  |
 |--------|----------:|--------------:|-----------:|
 | GPT    |      1.95 |          3.06 | **+1.11**  |
-| Sonnet |      1.33 |          1.72 |  +0.39     |
+| Sonnet |      1.33 |          1.71 |  +0.38     |
 | Gemini |      4.48 |          4.73 |  +0.25     |
 | Opus   |      1.62 |          1.79 |  +0.17     |
 

@@ -3,17 +3,26 @@ Cross-arm comparison.
 
 Reads arms/<arm>/arm.lock.json from every locked arm and REFUSES to compare
 unless every arm shares the same:
-  - pre_registration_hash (methodology DESIGN+PROMPTS+RUBRIC unchanged)
+  - pre_registration_hash (methodology unchanged — v1 OR v2 hash accepted)
   - materials_lock_hash   (corpus unchanged)
-  - design_grid           (cells, fill levels, positions, reps unchanged)
+  - design fingerprint    (positions, noise types, reports, reps, total
+                           context target — fill levels handled separately)
   - extractor + judge configuration (instruments held constant)
 
-This gating is what makes the comparison apples-to-apples — observed
-differences come from the analyst, not the methodology, the corpus, or the
-measuring instruments.
+v1 arms (Opus 4.7, Sonnet 4.6) carry the v1 methodology hash from
+`pre_registration.lock`. v2 arms (multi-vendor: GPT-5.5, Gemini 3.1 Pro,
+DeepSeek V4 Pro) carry the v2 hash from `pre_registration.v2.lock`. v1
+arms remain valid evidence under v2 by inheritance — the addendum only
+adds scope; see MULTI_VENDOR_ADDENDUM.md §1.
+
+Fill-level handling: the cross-arm tables are built over the INTERSECTION
+of `fill_levels_supported` (v2) or `fill_levels` (v1) across arms. Cells
+missing from any arm appear as `n/a` and are footnoted.
 
 If gating passes, joins graded records across arms and produces a drift-
-profile-by-arm comparison: per-cell judge dimension means, accuracy, etc.
+profile-by-arm comparison: per-cell judge dimension means, accuracy, plus
+per-arm parser-failure rate (model-side JSON adherence is a real model
+property — reported per arm, not filtered out).
 
 Usage:
   python -m scripts.compare_arms                                 # stdout summary
@@ -55,11 +64,61 @@ def discover_arms(restrict: list[str] | None = None) -> list[tuple[str, Path, di
     return out
 
 
+def valid_methodology_hashes() -> dict[str, str]:
+    """Return {hash → version_label} for every accepted methodology hash.
+
+    Loads pre_registration.lock (v1) and pre_registration.v2.lock (v2 if
+    present). Adding more lock files in future = adding more entries here.
+    """
+    out: dict[str, str] = {}
+    v1 = PROJECT_ROOT / "pre_registration.lock"
+    v2 = PROJECT_ROOT / "pre_registration.v2.lock"
+    if v1.exists():
+        h = json.loads(v1.read_text(encoding="utf-8")).get("methodology_hash")
+        if h:
+            out[h] = "v1"
+    if v2.exists():
+        h = json.loads(v2.read_text(encoding="utf-8")).get("methodology_hash")
+        if h:
+            out[h] = "v2"
+    return out
+
+
+def design_fingerprint(design_used: dict) -> dict:
+    """Extract the 'must match across arms' subset of design_used.
+
+    Excludes fill levels (handled by intersection logic), tokenizer_note
+    (record-only), and version-specific fields. Works for both v1 schema
+    (fill_levels) and v2 schema (fill_levels_target / fill_levels_supported).
+    """
+    return {
+        "positions": design_used.get("positions"),
+        "noise_types": design_used.get("noise_types"),
+        "reports": design_used.get("reports"),
+        "reps_per_cell": design_used.get("reps_per_cell"),
+        "tokens_total_context_target": design_used.get("tokens_total_context_target"),
+        "tokens_report_token_cap": design_used.get("tokens_report_token_cap"),
+    }
+
+
+def arm_fill_levels(design_used: dict) -> list[float]:
+    """Return the fill levels this arm actually ran. v2 arms expose
+    fill_levels_supported; v1 arms expose fill_levels."""
+    if "fill_levels_supported" in design_used:
+        return [float(f) for f in design_used["fill_levels_supported"]]
+    return [float(f) for f in design_used.get("fill_levels", [])]
+
+
 def gate_consistency(arms: list[tuple[str, Path, dict]]) -> tuple[bool, list[str]]:
     """Verify all arms agree on the things that must not vary. Returns (ok, errors)."""
     errors: list[str] = []
     if len(arms) < 2:
         return True, []  # nothing to gate against
+
+    accepted_hashes = valid_methodology_hashes()
+    if not accepted_hashes:
+        errors.append("no pre_registration lock files found at project root")
+        return False, errors
 
     ref_name, _, ref_lock = arms[0]
 
@@ -69,20 +128,27 @@ def gate_consistency(arms: list[tuple[str, Path, dict]]) -> tuple[bool, list[str
             cur = cur.get(p, {}) if isinstance(cur, dict) else {}
         return cur
 
-    ref_method = get(ref_lock, "pre_registration", "hash")
+    # Every arm's methodology hash must be in the accepted set (v1 or v2),
+    # not necessarily the SAME entry — v1 arms are valid evidence under v2.
+    for name, _, lock in arms:
+        h = get(lock, "pre_registration", "hash")
+        if h not in accepted_hashes:
+            errors.append(
+                f"arm {name}: pre_registration.hash {h!r} matches no known "
+                f"lock file (accepted: {sorted(accepted_hashes.keys())})"
+            )
+
     ref_mat = get(ref_lock, "materials", "lock_hash")
-    ref_design = get(ref_lock, "design_used")
+    ref_design_fp = design_fingerprint(get(ref_lock, "design_used"))
     ref_extractor = get(ref_lock, "instruments_used", "extractor")
     ref_judge_p = get(ref_lock, "instruments_used", "judge_primary")
     ref_judge_s = get(ref_lock, "instruments_used", "judge_secondary")
 
     for name, _, lock in arms[1:]:
-        if get(lock, "pre_registration", "hash") != ref_method:
-            errors.append(f"arm {name}: pre_registration.hash differs from {ref_name}")
         if get(lock, "materials", "lock_hash") != ref_mat:
             errors.append(f"arm {name}: materials.lock_hash differs from {ref_name}")
-        if get(lock, "design_used") != ref_design:
-            errors.append(f"arm {name}: design_used differs from {ref_name}")
+        if design_fingerprint(get(lock, "design_used")) != ref_design_fp:
+            errors.append(f"arm {name}: design fingerprint differs from {ref_name}")
         if get(lock, "instruments_used", "extractor") != ref_extractor:
             errors.append(f"arm {name}: extractor configuration differs from {ref_name}")
         if get(lock, "instruments_used", "judge_primary") != ref_judge_p:
@@ -120,7 +186,7 @@ def fmt_pct(num, den):
 
 
 def build_comparison(arms: list[tuple[str, Path, dict]]) -> dict:
-    """Return a nested dict: arm -> { 'tier12_acc_by_fill': ..., 'tier3_rq_by_fill': ..., 'cost_usd': float }.
+    """Return a nested dict: arm -> { 'tier12_acc_by_fill': ..., 'tier3_rq_by_fill': ..., 'cost_usd': float, ... }.
 
     Schema notes (matches what judge.py / autograder.py write to graded jsonl):
       tier 1/2 records: top-level `autograde` dict with `correct: bool`.
@@ -129,6 +195,7 @@ def build_comparison(arms: list[tuple[str, Path, dict]]) -> dict:
                         Optional `secondary` dict (Sonnet 20% subsample) and
                         `pairwise` dict (vs baseline) — not used here.
     """
+    accepted = valid_methodology_hashes()
     comp: dict = {}
     for name, arm_dir, arm_lock in arms:
         records = load_graded_records(arm_dir)
@@ -148,10 +215,20 @@ def build_comparison(arms: list[tuple[str, Path, dict]]) -> dict:
                 un = absolute.get("unsupported_claims")
                 if un is not None:
                     tier3_unsupported_by_fill[fill].append(float(un))
+        analyst = arm_lock.get("analyst", {}) or {}
+        design_used = arm_lock.get("design_used", {}) or {}
+        execution = arm_lock.get("execution_results", {}) or {}
+        method_hash = arm_lock.get("pre_registration", {}).get("hash", "?")
         comp[name] = {
             "n_records": len(records),
-            "cost_usd": float(arm_lock.get("execution_results", {}).get("cumulative_cost_usd", 0.0)),
-            "analyst_snapshot": arm_lock.get("analyst", {}).get("snapshot", "?"),
+            "cost_usd": float(execution.get("cumulative_cost_usd", 0.0)),
+            "analyst_snapshot": analyst.get("snapshot", "?"),
+            "vendor": analyst.get("vendor", "anthropic"),
+            "snapshot_note": analyst.get("snapshot_note", ""),
+            "tokenizer_note": design_used.get("tokenizer_note", ""),
+            "fill_levels_supported": arm_fill_levels(design_used),
+            "methodology_version": accepted.get(method_hash, "unknown"),
+            "parser_unparseable_pct": float(execution.get("grade_unparseable_pct", 0.0)),
             "tier12_acc_by_fill": {
                 fill: (sum(v), len(v)) for fill, v in sorted(tier12_by_fill.items())
             },
@@ -218,14 +295,44 @@ def render_comparison(comp: dict) -> list[str]:
         lines.append(f"| {fill:.2f} | " + " | ".join(cells) + " |")
     lines.append("")
 
-    lines.append("## Cost per arm")
+    lines.append("## Cost + parser-failure rate per arm")
     lines.append("")
-    lines.append("| arm | analyst | cost (USD) | n graded records |")
-    lines.append("|-----|---------|------------|------------------|")
+    lines.append("| arm | vendor | analyst | methodology | cost (USD) | n graded records | parser unparseable % |")
+    lines.append("|-----|--------|---------|-------------|------------|------------------|----------------------|")
     for arm in arms:
         c = comp[arm]
-        lines.append(f"| {arm} | {c['analyst_snapshot']} | ${c['cost_usd']:.2f} | {c['n_records']} |")
+        lines.append(
+            f"| {arm} | {c['vendor']} | {c['analyst_snapshot']} | "
+            f"{c['methodology_version']} | ${c['cost_usd']:.2f} | {c['n_records']} | "
+            f"{c['parser_unparseable_pct']:.1f}% |"
+        )
     lines.append("")
+
+    # ---- footnotes -------------------------------------------------------
+    # Per-arm rendering of fill-level support, snapshot mutability,
+    # tokenizer disclosure. Empty fields (v1 arms) skip silently.
+    notes_lines: list[str] = []
+    union_fills = sorted({f for arm in comp.values() for f in arm["fill_levels_supported"]})
+    for arm in arms:
+        c = comp[arm]
+        supported = set(c["fill_levels_supported"])
+        missing = sorted(set(union_fills) - supported)
+        bits = []
+        if missing:
+            bits.append(f"missing fills: {missing}")
+        if c["snapshot_note"]:
+            bits.append(f"snapshot: {c['snapshot_note']}")
+        if c["tokenizer_note"]:
+            bits.append(f"tokenizer: {c['tokenizer_note']}")
+        if bits:
+            notes_lines.append(f"- **{arm}** — " + "; ".join(bits))
+    if notes_lines:
+        lines.append("## Per-arm notes")
+        lines.append("")
+        lines.extend(notes_lines)
+        lines.append("")
+        lines.append("Cross-arm cells where an arm did not run a fill level appear as `n/a` in the tables above.")
+        lines.append("")
 
     return lines
 

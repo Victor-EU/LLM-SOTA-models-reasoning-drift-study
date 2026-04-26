@@ -128,8 +128,12 @@ def verify_analyst_in_raw_records(arm_dir: Path, *, quiet: bool) -> int:
         return 0
 
     arm_lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    expected_snapshot = arm_lock.get("analyst", {}).get("snapshot")
-    if not expected_snapshot:
+    analyst = arm_lock.get("analyst", {})
+    expected_snapshot = analyst.get("snapshot")
+    accepted = {expected_snapshot} if expected_snapshot else set()
+    accepted.update(analyst.get("snapshot_observed_aliases", []) or [])
+    accepted.discard(None)
+    if not accepted:
         if not quiet:
             print("  (skipped — arm.lock.json has no analyst.snapshot)")
         return 0
@@ -148,7 +152,7 @@ def verify_analyst_in_raw_records(arm_dir: Path, *, quiet: bool) -> int:
                 continue
             n_records += 1
             actual = r.get("model") or ""
-            if actual == expected_snapshot:
+            if actual in accepted:
                 n_match += 1
             elif not actual or r.get("stop_reason") is None:
                 # Failed-attempt artifact (e.g. dropped connection before model
@@ -162,7 +166,7 @@ def verify_analyst_in_raw_records(arm_dir: Path, *, quiet: bool) -> int:
         print(f"  records matching arm.lock analyst:      {n_match}")
         print(f"  failed-attempt records (audit trail):   {n_failed_attempt}")
         print(f"  records with mismatched analyst:        {len(mismatches)}")
-        print(f"  expected analyst snapshot:              {expected_snapshot}")
+        print(f"  accepted analyst snapshots:             {sorted(accepted)}")
     if mismatches:
         for run_id, actual in mismatches[:5]:
             print(f"    MISMATCH: run {run_id} has model={actual!r}")
@@ -170,6 +174,24 @@ def verify_analyst_in_raw_records(arm_dir: Path, *, quiet: bool) -> int:
             print(f"    ...and {len(mismatches)-5} more")
         return 1
     return 0
+
+
+def _load_accepted_methodology_hashes() -> dict[str, str]:
+    """Return {hash → version_label} for every project lock file present.
+
+    Both pre_registration.lock (v1) and pre_registration.v2.lock (v2) are
+    accepted. v1 arms remain valid evidence under v2 by inheritance —
+    see MULTI_VENDOR_ADDENDUM.md §1.
+    """
+    out: dict[str, str] = {}
+    for fname, label in [("pre_registration.lock", "v1"),
+                         ("pre_registration.v2.lock", "v2")]:
+        p = PROJECT_ROOT / fname
+        if p.exists():
+            h = json.loads(p.read_text(encoding="utf-8")).get("methodology_hash")
+            if h:
+                out[h] = label
+    return out
 
 
 def verify_arm_lock_consistency(arm_dir: Path, *, quiet: bool) -> int:
@@ -190,12 +212,14 @@ def verify_arm_lock_consistency(arm_dir: Path, *, quiet: bool) -> int:
     arm_lock = json.loads(lock_path.read_text(encoding="utf-8"))
     pre_reg = json.loads(pre_reg_path.read_text(encoding="utf-8"))
 
-    # Check 1: arm methodology hash matches project pre-reg
+    # Check 1: arm methodology hash is one of the accepted versions (v1 OR v2).
     arm_method = arm_lock["pre_registration"]["hash"]
-    proj_method = pre_reg["methodology_hash"]
-    method_ok = (arm_method == proj_method)
+    accepted = _load_accepted_methodology_hashes()
+    method_ok = arm_method in accepted
+    arm_method_version = accepted.get(arm_method, "unknown")
 
-    # Check 2: arm materials hash matches project pre-reg
+    # Check 2: arm materials hash matches project pre-reg (v1 — materials
+    # are unchanged across v1 → v2, so the v1 lock is the source of truth).
     arm_mat = arm_lock["materials"]["lock_hash"]
     proj_mat = pre_reg["materials_lock_hash"]
     mat_lock_ok = (arm_mat == proj_mat)
@@ -205,10 +229,10 @@ def verify_arm_lock_consistency(arm_dir: Path, *, quiet: bool) -> int:
     actual_ok = (proj_mat == actual_mat_hash)
 
     if not quiet:
-        print(f"  methodology_hash (arm == project):       {'OK' if method_ok else 'FAIL'}")
+        print(f"  methodology_hash version recognized:     {arm_method_version} ({'OK' if method_ok else 'FAIL'})")
         if not method_ok:
-            print(f"    arm:     {arm_method}")
-            print(f"    project: {proj_method}")
+            print(f"    arm hash:        {arm_method}")
+            print(f"    accepted set:    {sorted(accepted.keys())}")
         print(f"  materials_lock_hash (arm == project):    {'OK' if mat_lock_ok else 'FAIL'}")
         if not mat_lock_ok:
             print(f"    arm:     {arm_mat}")

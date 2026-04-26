@@ -28,11 +28,22 @@ import yaml
 class AnalystModelConfig:
     snapshot: str
     context_window: int
-    # Opus 4.7 adaptive thinking: effort ∈ {low, medium, high, xhigh, max}.
-    # None ⇒ no extended thinking (for models/calls that don't need it).
+    # Anthropic adaptive-thinking knob, effort ∈ {low, medium, high, xhigh, max}.
+    # None ⇒ no extended thinking (for models/calls that don't need it). For
+    # non-Anthropic vendors this stays None and `thinking_config` carries the
+    # vendor-native shape instead.
     thinking_effort: str | None
     max_output_tokens: int
     temperature: float
+    # v2 multi-vendor additions — defaulted so v1 Anthropic arm configs continue
+    # to load unchanged. See MULTI_VENDOR_ADDENDUM.md §7.
+    vendor: str = "anthropic"
+    snapshot_note: str = ""
+    # Vendor-native thinking config — opaque dict passed through to the adapter.
+    # Examples: {"reasoning": {"effort": "xhigh"}} for OpenAI,
+    # {"thinking_level": "high"} for Gemini, {"reasoning_effort": "max"} for
+    # DeepSeek if accepted. Anthropic ignores this and uses thinking_effort.
+    thinking_config: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -169,6 +180,12 @@ class ExperimentConfig:
             return "sonnet_4_6"
         if "haiku" in s:
             return "haiku_4_5"
+        if "gpt-5.5" in s or "gpt5.5" in s:
+            return "gpt_5_5"
+        if "gemini-3" in s:
+            return "gemini_3_1_pro"
+        if "deepseek" in s:
+            return "deepseek_v4_pro"
         raise ValueError(f"Unknown model family for snapshot {snapshot!r}")
 
 
@@ -287,13 +304,17 @@ def _build_config(
     def resolve(p: str) -> Path:
         return (base_dir / p).resolve()
 
+    analyst_raw = raw["models"]["analyst"]
     models = ModelsConfig(
         analyst=AnalystModelConfig(
-            snapshot=raw["models"]["analyst"]["snapshot"],
-            context_window=int(raw["models"]["analyst"]["context_window"]),
-            thinking_effort=_opt_effort(raw["models"]["analyst"].get("thinking_effort")),
-            max_output_tokens=int(raw["models"]["analyst"]["max_output_tokens"]),
-            temperature=float(raw["models"]["analyst"]["temperature"]),
+            snapshot=analyst_raw["snapshot"],
+            context_window=int(analyst_raw["context_window"]),
+            thinking_effort=_opt_effort(analyst_raw.get("thinking_effort")),
+            max_output_tokens=int(analyst_raw["max_output_tokens"]),
+            temperature=float(analyst_raw["temperature"]),
+            vendor=str(analyst_raw.get("vendor", "anthropic")).lower(),
+            snapshot_note=str(analyst_raw.get("snapshot_note", "")),
+            thinking_config=analyst_raw.get("thinking_config"),
         ),
         extractor=AuxModelConfig(
             snapshot=raw["models"]["extractor"]["snapshot"],
@@ -407,6 +428,13 @@ def _build_config(
     return cfg
 
 
+_KNOWN_VENDORS = {"anthropic", "openai", "google", "deepseek"}
+_KNOWN_PRICING_FAMILIES = {
+    "opus_4_7", "sonnet_4_6", "haiku_4_5",
+    "gpt_5_5", "gemini_3_1_pro", "deepseek_v4_pro",
+}
+
+
 def _validate(cfg: ExperimentConfig) -> None:
     if not cfg.arm_name or "/" in cfg.arm_name or cfg.arm_name.startswith("."):
         raise ValueError(f"invalid arm_name {cfg.arm_name!r} — must be filename-safe")
@@ -418,7 +446,24 @@ def _validate(cfg: ExperimentConfig) -> None:
         raise ValueError("design.fill_levels must include 0.0 (baseline)")
     if cfg.cost.hard_stop_usd <= cfg.cost.budget_usd:
         raise ValueError("hard_stop_usd must exceed budget_usd")
-    known_families = {"opus_4_7", "sonnet_4_6", "haiku_4_5"}
+    if cfg.models.analyst.vendor not in _KNOWN_VENDORS:
+        raise ValueError(
+            f"unknown analyst vendor {cfg.models.analyst.vendor!r} — must be one of "
+            f"{sorted(_KNOWN_VENDORS)}"
+        )
+    # Anthropic vendor: thinking_effort is the canonical knob; thinking_config
+    # should be None (the YAML may set it but the adapter ignores it).
+    # Non-Anthropic vendor: thinking_effort must be None and thinking_config
+    # carries the vendor-native shape.
+    if cfg.models.analyst.vendor != "anthropic":
+        if cfg.models.analyst.thinking_effort is not None:
+            raise ValueError(
+                f"vendor={cfg.models.analyst.vendor!r} must use thinking_config, "
+                f"not thinking_effort (got {cfg.models.analyst.thinking_effort!r})"
+            )
     for fam in cfg.cost.pricing:
-        if fam not in known_families:
-            raise ValueError(f"unknown pricing family {fam!r}")
+        if fam not in _KNOWN_PRICING_FAMILIES:
+            raise ValueError(
+                f"unknown pricing family {fam!r} — must be one of "
+                f"{sorted(_KNOWN_PRICING_FAMILIES)}"
+            )

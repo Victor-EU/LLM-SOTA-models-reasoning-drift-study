@@ -132,7 +132,13 @@ def _estimate_cost(cfg: ExperimentConfig, cells: list[CellSpec], pilot: bool) ->
         None: 2000, "low": 500, "medium": 2000,
         "high": 8000, "xhigh": 15000, "max": 20000,
     }
-    avg_output_tokens = effort_to_output_estimate.get(cfg.models.analyst.thinking_effort, 20000)
+    # Non-Anthropic vendors store effort in thinking_config (vendor-native shape)
+    # rather than thinking_effort. They run at vendor-max per MULTI_VENDOR_ADDENDUM
+    # §3 — estimate at "max" tier for cost projection.
+    analyst_effort_for_est = cfg.models.analyst.thinking_effort
+    if analyst_effort_for_est is None and cfg.models.analyst.vendor != "anthropic":
+        analyst_effort_for_est = "max"
+    avg_output_tokens = effort_to_output_estimate.get(analyst_effort_for_est, 20000)
     collect_output_usd = total_runs * avg_output_tokens * analyst_pricing.output / 1_000_000
 
     # Extractor
@@ -308,8 +314,15 @@ async def _check_one_cell(
     realized = None
     if client is not None:
         try:
+            # See note in src/tokens.py — non-Anthropic arms use the judge
+            # primary's Anthropic snapshot for fill-grid tokenization.
+            tokenizer_model = (
+                cfg.models.analyst.snapshot
+                if cfg.models.analyst.vendor == "anthropic"
+                else cfg.models.judge_primary.snapshot
+            )
             resp = await client.messages.count_tokens(
-                model=cfg.models.analyst.snapshot,
+                model=tokenizer_model,
                 system=prompt.system,
                 messages=prompt.messages,
             )

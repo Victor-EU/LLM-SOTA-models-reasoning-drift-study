@@ -109,7 +109,11 @@ cost:
   budget_usd: 700.0
   hard_stop_usd: 850.0
   pricing:
-    # USD per million tokens.
+    # USD per million tokens. Anthropic rates published, others snapshotted from
+    # vendor docs as of 2026-04-25 (see MULTI_VENDOR_ADDENDUM.md).
+    # Non-Anthropic vendors with tiered pricing are listed at the HIGH tier
+    # (which dominates this experiment — 12/13 cells exceed the low-tier
+    # threshold). Per-arm arm.lock.json snapshots the exact rate at lock time.
     opus_4_7:
       input: 15.00
       output: 75.00
@@ -125,6 +129,28 @@ cost:
       output: 4.00
       cache_read: 0.08
       cache_write: 1.00
+    # OpenAI GPT-5.5: $5/$30 below 272K input tokens, $10/$45 above. Cached
+    # input $0.50/M flat. We list the high tier since 12/13 cells > 272K.
+    gpt_5_5:
+      input: 10.00
+      output: 45.00
+      cache_read: 0.50
+      cache_write: 0.00
+    # Google Gemini 3.1 Pro: $2/$12 below 200K input tokens, $4/$18 above.
+    # Cache pricing not documented in dev guide as of lock; treat as 0.
+    gemini_3_1_pro:
+      input: 4.00
+      output: 18.00
+      cache_read: 0.00
+      cache_write: 0.00
+    # DeepSeek V4 Pro: regular pricing (NOT promo). Promo of 75% off through
+    # 2026-05-05 15:59 UTC; per-arm arm.lock.json captures actual rate paid.
+    # cache_read = cache hit price; input = cache miss price.
+    deepseek_v4_pro:
+      input: 1.74
+      output: 3.48
+      cache_read: 0.145
+      cache_write: 0.00
 
 # ------------------------------------------------------------------
 # Observability.

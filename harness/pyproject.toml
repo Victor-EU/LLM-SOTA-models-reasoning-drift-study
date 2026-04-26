@@ -7,6 +7,11 @@ dependencies = [
     "anthropic>=0.40.0",
     "pyyaml>=6.0",
     "python-dotenv>=1.0",
+    # v2 multi-vendor analyst adapters. openai also serves DeepSeek (V4 Pro
+    # exposes an OpenAI-compatible endpoint at api.deepseek.com — no
+    # first-party DeepSeek SDK exists).
+    "openai>=1.50.0",
+    "google-genai>=0.3.0",
 ]
 
 [project.optional-dependencies]

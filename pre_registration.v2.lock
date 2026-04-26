@@ -1,0 +1,107 @@
+{
+  "$schema_version": "2.0",
+  "experiment_name": "opus-4.7-reasoning-drift",
+  "version_lineage": {
+    "supersedes": null,
+    "extends": "pre_registration.lock",
+    "extends_hash": "61b2d30f0c741bd96f24159fedc814276df565de317f780e117a3c7e32100419",
+    "rule": "v2 = v1 + MULTI_VENDOR_ADDENDUM.md. v1 lock file is unchanged. v1 arms remain valid evidence under v2 by inheritance — the addendum only ADDS scope (admitting non-Anthropic vendors and codifying their footnotes), it does not change the task, materials, prompts, rubric, design grid, extractor, or judge configuration."
+  },
+
+  "methodology_files": ["DESIGN.md", "PROMPTS.md", "RUBRIC.md", "MULTI_VENDOR_ADDENDUM.md"],
+  "methodology_hash": "3433f4a67cde4b24b92a1b41a78271aa5dbb4572beb2ee23e1d8c2c31d189e8e",
+  "methodology_hash_recipe": "sha256 of DESIGN.md + PROMPTS.md + RUBRIC.md + MULTI_VENDOR_ADDENDUM.md concatenated as raw bytes (no separator)",
+  "methodology_hash_reproduce": "python3 -c \"import hashlib; print(hashlib.sha256(b''.join(open(f, 'rb').read() for f in ['DESIGN.md','PROMPTS.md','RUBRIC.md','MULTI_VENDOR_ADDENDUM.md'])).hexdigest())\"",
+  "methodology_hash_history": [
+    {"hash": "753e23216644227bb9dc5fc5bd491717f6651d67147ac4fd11a41f44cdd52397", "addendum_version": "0.1", "locked_at": "2026-04-25T22:30:00Z", "superseded_at": "2026-04-25T23:35:00Z", "supersede_reason": "v0.2 addendum revision: §3 confirms DeepSeek reasoning_effort=max accepted; §4 replaces ±5% tokenizer guess with empirical 0.62/0.69/0.63 ratios from 2026-04-25 baseline smokes; §5 adds per-vendor adapter normalization rules (Gemini bundling, OpenAI verbatim, DeepSeek dedup + estimated thinking_tokens); §6 expands DeepSeek system_fingerprint capture mechanism. No locked arms exist at v0.1 hash, so no arm.lock.json invalidation."}
+  ],
+
+  "materials_lock_path": "materials/materials.lock.json",
+  "materials_lock_hash": "c13b5514279c9d8dbc5118ec9b3b1325a0cff56c4fb1cee8d66992a98cd25199",
+  "materials_lock_hash_recipe": "sha256 of materials/materials.lock.json file bytes (UNCHANGED from v1 — same materials, no rehash)",
+  "materials_corpus_summary": {
+    "target_company": "MSFT",
+    "target_files": ["target/MSFT/10k.txt", "target/MSFT/earnings_call.txt"],
+    "ground_truth_file": "ground_truth/MSFT.json",
+    "questions_file": "questions/MSFT.json",
+    "noise_pool": "noise/peer_materials/MSFT/{aapl,amzn,crm,googl,meta,nvda,orcl}_10k_fy2025-2026.txt"
+  },
+
+  "design_grid": {
+    "fill_levels": [0.00, 0.25, 0.50, 0.75, 0.95],
+    "positions": ["start", "middle", "end"],
+    "noise_types": ["peer_materials"],
+    "reports": ["MSFT"],
+    "reps_per_cell": 7,
+    "baseline_cells": 1,
+    "noise_cells": 12,
+    "total_cells": 13,
+    "total_runs_per_arm": 91,
+    "questions_per_run": 8,
+    "tiers": {
+      "tier_1_factual": ["F01", "F02", "F03"],
+      "tier_2_calculation": ["C01", "C02"],
+      "tier_3_synthesis": ["S01", "S02", "S03"]
+    },
+    "design_grid_note": "fill_levels are TARGETS computed in Anthropic tokens. Per-arm fill_levels_supported (in arm.lock.json.design_used) may be a subset if the analyst's context window is below tokens.total_context_target. Realized fill on non-Anthropic arms diverges by ~±5% due to tokenizer differences — see MULTI_VENDOR_ADDENDUM.md §4."
+  },
+
+  "instruments_held_constant_across_arms": {
+    "rationale": "The extractor is mechanical normalization; the judge is the measuring instrument. Both held constant across all arms (Anthropic and non-Anthropic alike) so observed differences cannot be attributed to instrument drift. This is what makes cross-vendor comparison meaningful.",
+    "extractor": {
+      "snapshot": "claude-haiku-4-5-20251001",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": null
+    },
+    "judge_primary": {
+      "snapshot": "claude-opus-4-7",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": "max"
+    },
+    "judge_secondary": {
+      "snapshot": "claude-sonnet-4-6",
+      "max_output_tokens": 8192,
+      "temperature": 1.0,
+      "thinking_effort": "high",
+      "subsample_pct": 20
+    }
+  },
+
+  "what_varies_across_arms": [
+    "models.analyst.vendor (NEW in v2: anthropic | google | openai | deepseek)",
+    "models.analyst.snapshot",
+    "models.analyst.snapshot_note (NEW in v2: mutability disclosure + 'why this is max thinking')",
+    "models.analyst.context_window",
+    "models.analyst.thinking_config (NEW in v2: vendor-native shape — replaces thinking_effort for non-Anthropic)",
+    "models.analyst.thinking_effort (KEPT for Anthropic backward compat)",
+    "models.analyst.max_output_tokens",
+    "tokens.total_context_target (only when analyst context window differs)",
+    "tokens.report_token_cap (proportional to total_context_target)",
+    "design_used.fill_levels_supported (NEW in v2: subset of fill_levels_target if context-limited)"
+  ],
+
+  "what_must_not_vary_across_arms": [
+    "DESIGN.md, PROMPTS.md, RUBRIC.md (frozen by v1 hash, inherited by v2)",
+    "MULTI_VENDOR_ADDENDUM.md (added in v2; pinned by v2 hash)",
+    "materials/* (frozen by materials_lock_hash, unchanged)",
+    "design_grid (cells, fill levels, positions, reps, questions)",
+    "extractor configuration",
+    "judge_primary configuration",
+    "judge_secondary configuration",
+    "noise pool seeding scheme — sha256(report|fill|position|rep)"
+  ],
+
+  "noise_seeding_scheme": "sha256(f'{report}|{fill_pct}|{position}|{rep_idx}') drives the FFD noise pack. Analyst snapshot is NOT an input — all arms see byte-identical assembled prompts for the same (cell, rep) coordinates. Tokenizer differences are downstream of assembly and disclosed per-arm via tokenizer_note.",
+
+  "v1_arms_inheritance": {
+    "rule": "Arms locked under v1 (pre_registration.hash = 61b2d30f...) are valid evidence under v2 without re-locking. compare_arms.py accepts an arm whose pre_registration.hash equals EITHER the v1 hash OR the v2 hash, and refuses any other value.",
+    "rationale": "The addendum only adds scope. Every claim a v1 arm makes about analyst-attributable drift is still true under v2 because the v1 methodology is a strict subset of the v2 methodology.",
+    "arms_grandfathered_under_v1": ["opus-4-7", "sonnet-4-6"]
+  },
+
+  "locked_at": "2026-04-25T23:35:00Z",
+  "locked_by": "Victor Zhang <victor.zhang.eu@gmail.com>",
+  "lock_notes": "v2 lock (addendum v0.2, post-smoke revision) authorizes three new analyst arms: gpt-5-5 (OpenAI GPT-5.5, GA 2026-04-24), gemini-3-1-pro (Google Gemini 3.1 Pro Preview, alias gemini-3-pro-preview), deepseek-v4-pro (DeepSeek V4 Pro Preview, mutable snapshot — system_fingerprint logged per call). All three at 1M context with vendor-native max thinking effort (DeepSeek reasoning_effort=max confirmed accepted at 2026-04-25 smoke). Same materials, prompts, rubric, design grid, extractor, and judge configuration as v1 arms. Judge bias acceptance (Opus 4.7 max as primary judge across all 5 arms) formalized in MULTI_VENDOR_ADDENDUM.md §7. v0.2 revision incorporates empirical findings from the three baseline smokes: per-vendor tokenizer ratios (§4), per-vendor adapter normalization rules (§5), DeepSeek system_fingerprint capture (§6). See MULTI_VENDOR_ADDENDUM.md for the full extension specification and methodology_hash_history above for the prior v0.1 hash."
+}

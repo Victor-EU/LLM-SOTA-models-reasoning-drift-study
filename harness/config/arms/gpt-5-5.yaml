@@ -1,0 +1,56 @@
+# GPT-5.5 analyst arm — first non-Anthropic arm under v2 methodology.
+#
+# Tests whether the drift profile observed for Anthropic models reproduces in
+# a top-tier OpenAI reasoning model at vendor-max reasoning effort. All other
+# variables (extractor, judge, prompts, materials, design grid, noise pool,
+# seeds) are held identical via base.yaml — apples-to-apples preserved.
+#
+# v2 methodology — see MULTI_VENDOR_ADDENDUM.md for the multi-vendor
+# extension specification.
+#
+# UNVERIFIED at lock authoring time (will validate during smoke test):
+#   - reasoning.effort=xhigh accepted (per OpenAI Responses API docs;
+#     supported values are model-dependent, but xhigh is documented as the
+#     top of the enum for GPT-5.5).
+#   - max_output_tokens=128000 accommodates xhigh reasoning + the 8-answer
+#     JSON body. OpenAI bundles reasoning_tokens INTO output_tokens; need
+#     headroom for both. Conservative starting value; revisit after pilot.
+#   - 1M context window — confirmed at 1,050,000 input tokens per OpenAI
+#     docs. Above 272K input, pricing shifts to 2x input / 1.5x output —
+#     base.yaml lists the high tier rate since 12/13 cells exceed 272K.
+#   - Tokenizer differs from Anthropic by ~±5% on English prose; fill
+#     levels are computed in Anthropic tokens (see addendum §4).
+
+experiment:
+  # Override base.yaml v1 hash with v2 hash (DESIGN + PROMPTS + RUBRIC + MULTI_VENDOR_ADDENDUM).
+  # Locked 2026-04-25T23:35:00Z per pre_registration.v2.lock methodology_hash.
+  pre_registration_hash: "3433f4a67cde4b24b92a1b41a78271aa5dbb4572beb2ee23e1d8c2c31d189e8e"
+
+arm:
+  name: gpt-5-5
+  description: "OpenAI GPT-5.5 with reasoning.effort=xhigh (vendor max). v2 multi-vendor arm."
+
+models:
+  analyst:
+    vendor: openai
+    snapshot: "gpt-5.5-2026-04-23"
+    snapshot_note: |
+      OpenAI GPT-5.5, GA 2026-04-24. Snapshot ID is dated and pinned;
+      OpenAI commits to serving this exact build indefinitely.
+      Reasoning at xhigh is the vendor max — top of {none, low, medium,
+      high, xhigh}. Encrypted reasoning blobs are exposed via include=
+      ["reasoning.encrypted_content"]; raw chain-of-thought is redacted
+      (synthetic summaries only via reasoning.summary=auto).
+    context_window: 1050000
+    # MUST be null for non-Anthropic vendors (config validator enforces).
+    thinking_effort: null
+    thinking_config:
+      reasoning:
+        effort: xhigh
+        summary: auto
+    # 128K — accommodates xhigh reasoning tokens (potentially many K) plus
+    # the 8-answer JSON body. Reasoning tokens are bundled into
+    # output_tokens by OpenAI; need headroom for both. Conservative
+    # starting value; smoke test will show realized usage.
+    max_output_tokens: 128000
+    temperature: 1.0

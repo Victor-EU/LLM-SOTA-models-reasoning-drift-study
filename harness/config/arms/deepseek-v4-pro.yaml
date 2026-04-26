@@ -1,0 +1,60 @@
+# DeepSeek V4 Pro analyst arm — third non-Anthropic arm under v2 methodology.
+#
+# Tests whether the drift profile observed for Anthropic + OpenAI + Google
+# arms reproduces in DeepSeek's top-tier reasoning model at vendor-max
+# thinking. All other variables (extractor, judge, prompts, materials,
+# design grid, noise pool, seeds) held identical via base.yaml.
+#
+# v2 methodology — see MULTI_VENDOR_ADDENDUM.md.
+#
+# UNVERIFIED at lock authoring time (will validate during smoke test):
+#   - reasoning_effort=max accepted by deepseek-v4-pro. Per third-party
+#     report (blockchain.news 2026-04-24), V4 introduces reasoning_effort
+#     enum with high/max levels. NOT yet in official DeepSeek docs as of
+#     2026-04-25; the smoke test probes acceptance. If max rejected,
+#     fallback to high (still vendor-max for V4 Flash; for V4 Pro the
+#     enum is unconfirmed).
+#   - reasoning_content field carries raw CoT in V4 (legacy V3 behavior).
+#   - 1M context window — confirmed at api-docs.deepseek.com 2026-04-24.
+#   - max_output_tokens=128000 conservative; V4 docs say up to 384K
+#     combined reasoning + answer (we don't need that much).
+#   - Snapshot string is mutable. system_fingerprint logged per call as
+#     the build-identifier audit trail.
+#
+# TIMING URGENCY: DeepSeek promo pricing (75% off) closes 2026-05-05
+# 15:59 UTC. base.yaml lists REGULAR pricing; arm.lock.json snapshots
+# the actual rate paid at lock time.
+
+experiment:
+  # Override base.yaml v1 hash with v2 hash (DESIGN + PROMPTS + RUBRIC + MULTI_VENDOR_ADDENDUM).
+  # Locked 2026-04-25T23:35:00Z per pre_registration.v2.lock methodology_hash.
+  pre_registration_hash: "3433f4a67cde4b24b92a1b41a78271aa5dbb4572beb2ee23e1d8c2c31d189e8e"
+
+arm:
+  name: deepseek-v4-pro
+  description: "DeepSeek V4 Pro Preview with reasoning_effort=max (vendor max, pending verification). v2 multi-vendor arm."
+
+models:
+  analyst:
+    vendor: deepseek
+    snapshot: "deepseek-v4-pro"
+    snapshot_note: |
+      DeepSeek V4 Pro Preview, released 2026-04-24. Snapshot string is
+      a mutable alias — DeepSeek does not publish dated snapshot IDs.
+      The harness logs system_fingerprint returned per call into raw
+      records as the per-call build identifier; arm.lock.json records
+      both the requested string and observed system_fingerprints.
+      Wrapped via openai SDK against api.deepseek.com (no first-party
+      DeepSeek SDK). reasoning_effort=max is per third-party report;
+      acceptance probed at smoke time. Raw chain-of-thought exposed
+      via reasoning_content field on the message (legacy V3 behavior;
+      V4 carryover unconfirmed at lock).
+    context_window: 1000000
+    # MUST be null for non-Anthropic vendors (config validator enforces).
+    thinking_effort: null
+    thinking_config:
+      reasoning_effort: max
+    # 128K — sufficient for reasoning+answer; V4 supports up to 384K
+    # combined but we don't need that.
+    max_output_tokens: 128000
+    temperature: 1.0

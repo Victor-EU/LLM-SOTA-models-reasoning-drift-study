@@ -103,7 +103,17 @@ async def resolve_budget(
         iterations += 1
         noise_a, noise_b = compute_noise_split(run.cell.position, total_noise_budget)
         prompt = assemble(run, materials, noise_a, noise_b)
-        realized = await count_tokens(client, cfg.models.analyst.snapshot, prompt)
+        # Anthropic's count_tokens endpoint requires an Anthropic model. For
+        # non-Anthropic analyst arms, fill is computed in Anthropic tokens
+        # (per MULTI_VENDOR_ADDENDUM.md §4) using the judge primary's snapshot
+        # as the canonical Anthropic tokenizer — judge_primary is held constant
+        # at claude-opus-4-7 across all arms.
+        tokenizer_model = (
+            cfg.models.analyst.snapshot
+            if cfg.models.analyst.vendor == "anthropic"
+            else cfg.models.judge_primary.snapshot
+        )
+        realized = await count_tokens(client, tokenizer_model, prompt)
         delta = target_input_tokens - realized
 
         if best is None or abs(delta) < best[0]:

@@ -1,0 +1,131 @@
+{
+  "$schema_version": "2.0",
+  "arm_name": "gemini-3-1-pro",
+  "arm_description": "Google Gemini 3.1 Pro Preview with thinking_level=HIGH (vendor max). v2 multi-vendor arm.",
+  "pre_registration": {
+    "hash": "3433f4a67cde4b24b92a1b41a78271aa5dbb4572beb2ee23e1d8c2c31d189e8e",
+    "lock_file": "../../pre_registration.v2.lock",
+    "note": "MUST match pre_registration.v2.lock.methodology_hash. compare_arms.py refuses to run if any arm's hash differs."
+  },
+  "materials": {
+    "lock_hash": "c13b5514279c9d8dbc5118ec9b3b1325a0cff56c4fb1cee8d66992a98cd25199",
+    "lock_path": "../../materials/materials.lock.json",
+    "note": "MUST match pre_registration.v2.lock.materials_lock_hash."
+  },
+  "analyst": {
+    "vendor": "google",
+    "snapshot": "gemini-3-pro-preview",
+    "snapshot_observed_aliases": [
+      "gemini-3.1-pro-preview"
+    ],
+    "snapshot_observed_aliases_note": "Some vendors return a build-resolved model ID (e.g., a versioned alias) different from the requested snapshot string. The verify script accepts records whose model matches snapshot OR any value here. A single value indicates no mid-experiment build drift.",
+    "context_window": 1048576,
+    "thinking_effort": null,
+    "thinking_config": {
+      "thinking_level": "HIGH"
+    },
+    "max_output_tokens": 64000,
+    "temperature": 1.0
+  },
+  "instruments_used": {
+    "extractor": {
+      "snapshot": "claude-haiku-4-5-20251001",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": null
+    },
+    "judge_primary": {
+      "snapshot": "claude-opus-4-7",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": "max"
+    },
+    "judge_secondary": {
+      "snapshot": "claude-sonnet-4-6",
+      "max_output_tokens": 8192,
+      "temperature": 1.0,
+      "thinking_effort": "high",
+      "subsample_pct": 20
+    }
+  },
+  "design_used": {
+    "fill_levels": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      0.95
+    ],
+    "positions": [
+      "start",
+      "middle",
+      "end"
+    ],
+    "noise_types": [
+      "peer_materials"
+    ],
+    "reports": [
+      "MSFT"
+    ],
+    "reps_per_cell": 7,
+    "tokens_total_context_target": 1000000,
+    "tokens_report_token_cap": 130000
+  },
+  "pricing_at_lock_usd_per_million_tokens": {
+    "opus_4_7": {
+      "input": 15.0,
+      "output": 75.0,
+      "cache_read": 1.5,
+      "cache_write": 18.75
+    },
+    "sonnet_4_6": {
+      "input": 3.0,
+      "output": 15.0,
+      "cache_read": 0.3,
+      "cache_write": 3.75
+    },
+    "haiku_4_5": {
+      "input": 0.8,
+      "output": 4.0,
+      "cache_read": 0.08,
+      "cache_write": 1.0
+    },
+    "gemini_3_1_pro": {
+      "input": 4.0,
+      "output": 18.0,
+      "cache_read": 0.0,
+      "cache_write": 0.0
+    }
+  },
+  "pricing_note": "Snapshotted to allow honest cost reconstruction even if API pricing changes after this arm closes.",
+  "execution_results": {
+    "collect_runs_completed": 91,
+    "extract_records_total": 728,
+    "extract_records_parsed_ok": 728,
+    "extract_records_parsed_ok_pct": 100.0,
+    "grade_records_completed": 728,
+    "cumulative_cost_usd": 221.0,
+    "budget_usd": 700.0,
+    "hard_stop_usd": 850.0,
+    "analyst_models_observed": [
+      "gemini-3.1-pro-preview"
+    ]
+  },
+  "data_integrity": {
+    "data_root": "data/",
+    "data_manifest_path": "data.manifest.sha256",
+    "data_manifest_sha256_self": "40fd0672a1cc0307f801dc46b66fbfe02f0e3a01ee7ebb65deb2807e712f6b43",
+    "data_manifest_sha256_self_recipe": "sha256 of arms/gemini-3-1-pro/data.manifest.sha256 file bytes",
+    "verify_command": "python3 -m scripts.verify_arm_integrity --arm gemini-3-1-pro"
+  },
+  "git_anchor": {
+    "commit": "8e7573de0b9b80afb646b2035d6323f354315730",
+    "tag": "arm/gemini-3-1-pro/data-v2.0",
+    "note": "Tag pending; create with `git tag -a arm/<arm>/data-v2.0 -m 'lock' <commit>` after lock review."
+  },
+  "locked_at": "2026-04-26T08:50:26Z",
+  "locked_by": "Victor Zhang <victor.zhang.eu@gmail.com>",
+  "reports": [
+    "reports/FINAL_REPORT.md"
+  ]
+}

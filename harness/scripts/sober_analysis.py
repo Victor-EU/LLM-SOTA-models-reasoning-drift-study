@@ -31,9 +31,29 @@ SOBER_DIR = PROJECT_ROOT / "cross_arm" / "sober_state"
 
 ARMS = ("opus-4-7", "sonnet-4-6", "gpt-5-5", "gemini-3-1-pro", "deepseek-v4-pro")
 QIDS = ("MSFT-S-01", "MSFT-S-02", "MSFT-S-03")
-JUDGES = ("opus", "sonnet")
+# Display order for known judges. Auto-discovery picks up any judge_*.jsonl
+# that exists; this tuple just controls section ordering in the printout.
+JUDGES = ("opus", "sonnet", "gpt", "gemini")
 DIMS_5 = ("groundedness", "evidentiary_breadth", "scope_adherence", "clarity", "citation_accuracy")
 DIM_RQ = "reasoning_quality"
+
+
+def _discover_judges() -> list[str]:
+    """Return sorted list of judge labels that have a non-empty jsonl file.
+    Sorted by JUDGES display order; unknowns appended alphabetically."""
+    if not SOBER_DIR.exists():
+        return []
+    found: list[str] = []
+    for path in SOBER_DIR.glob("judge_*.jsonl"):
+        # Skip backup files like judge_sonnet.jsonl.bak
+        if path.suffix != ".jsonl":
+            continue
+        label = path.stem.removeprefix("judge_")
+        if path.stat().st_size > 0:
+            found.append(label)
+    known = [j for j in JUDGES if j in found]
+    extras = sorted([j for j in found if j not in JUDGES])
+    return known + extras
 
 
 # ---- IO ------------------------------------------------------------------
@@ -222,8 +242,10 @@ class CrossJudge:
     rank_agreement_topk_3: float        # fraction of items where top-3 sets match
 
 
-def _cross_judge(opus: JudgeAggregate, sonnet: JudgeAggregate) -> CrossJudge:
-    common = set(opus.rankings_by_item.keys()) & set(sonnet.rankings_by_item.keys())
+def _cross_judge(a: JudgeAggregate, b: JudgeAggregate) -> CrossJudge:
+    """Compare two JudgeAggregates. Symmetric — labels are just "first" /
+    "second" in the report. Used pairwise across all available judges."""
+    common = set(a.rankings_by_item.keys()) & set(b.rankings_by_item.keys())
     common_keys = sorted(common)
     if not common_keys:
         return CrossJudge(0, float("nan"), float("nan"), float("nan"), float("nan"), float("nan"), float("nan"))
@@ -232,30 +254,30 @@ def _cross_judge(opus: JudgeAggregate, sonnet: JudgeAggregate) -> CrossJudge:
     top1_match = 0
     top3_match = 0
     for k in common_keys:
-        opus_order = opus.rankings_by_item[k]
-        sonnet_order = sonnet.rankings_by_item[k]
-        # Build rank vectors aligned to ARMS order
-        opus_ranks = [opus_order.index(a) + 1 if a in opus_order else 6 for a in ARMS]
-        sonnet_ranks = [sonnet_order.index(a) + 1 if a in sonnet_order else 6 for a in ARMS]
-        item_spearmans.append(_spearman([float(r) for r in opus_ranks], [float(r) for r in sonnet_ranks]))
-        if opus_order and sonnet_order and opus_order[0] == sonnet_order[0]:
+        a_order = a.rankings_by_item[k]
+        b_order = b.rankings_by_item[k]
+        # Build rank vectors aligned to ARMS order; missing arms get rank=6
+        # (sentinel below the worst real rank).
+        a_ranks = [a_order.index(arm) + 1 if arm in a_order else 6 for arm in ARMS]
+        b_ranks = [b_order.index(arm) + 1 if arm in b_order else 6 for arm in ARMS]
+        item_spearmans.append(_spearman([float(r) for r in a_ranks], [float(r) for r in b_ranks]))
+        if a_order and b_order and a_order[0] == b_order[0]:
             top1_match += 1
-        if len(opus_order) >= 3 and len(sonnet_order) >= 3 and set(opus_order[:3]) == set(sonnet_order[:3]):
+        if len(a_order) >= 3 and len(b_order) >= 3 and set(a_order[:3]) == set(b_order[:3]):
             top3_match += 1
 
-    # Per-arm consistency: mean rank vector and Borda vector across arms
-    arm_borda_opus = [opus.borda_total[a] for a in ARMS]
-    arm_borda_sonnet = [sonnet.borda_total[a] for a in ARMS]
-    arm_rank_opus = [opus.mean_rank[a] for a in ARMS]
-    arm_rank_sonnet = [sonnet.mean_rank[a] for a in ARMS]
+    arm_borda_a = [a.borda_total[arm] for arm in ARMS]
+    arm_borda_b = [b.borda_total[arm] for arm in ARMS]
+    arm_rank_a = [a.mean_rank[arm] for arm in ARMS]
+    arm_rank_b = [b.mean_rank[arm] for arm in ARMS]
 
     return CrossJudge(
         n_overlap_items=len(common_keys),
         per_item_spearman_mean=sum(item_spearmans) / len(item_spearmans),
         per_item_spearman_median=statistics.median(item_spearmans),
-        per_arm_borda_pearson=_pearson([float(x) for x in arm_borda_opus],
-                                       [float(x) for x in arm_borda_sonnet]),
-        per_arm_rank_pearson=_pearson(arm_rank_opus, arm_rank_sonnet),
+        per_arm_borda_pearson=_pearson([float(x) for x in arm_borda_a],
+                                       [float(x) for x in arm_borda_b]),
+        per_arm_rank_pearson=_pearson(arm_rank_a, arm_rank_b),
         rank_agreement_top1=top1_match / len(common_keys),
         rank_agreement_topk_3=top3_match / len(common_keys),
     )
@@ -374,8 +396,8 @@ def _print_judge(agg: JudgeAggregate) -> str:
     return "\n".join(lines)
 
 
-def _print_cross(cj: CrossJudge) -> str:
-    lines = ["\n=== CROSS-JUDGE AGREEMENT (Opus primary vs Sonnet secondary) ==="]
+def _print_cross(cj: CrossJudge, label_a: str, label_b: str) -> str:
+    lines = [f"\n=== CROSS-JUDGE AGREEMENT ({label_a} vs {label_b}) ==="]
     lines.append(f"items overlapping:                {cj.n_overlap_items}")
     lines.append(f"per-item Spearman ρ (mean):        {cj.per_item_spearman_mean:.3f}")
     lines.append(f"per-item Spearman ρ (median):      {cj.per_item_spearman_median:.3f}")
@@ -395,12 +417,13 @@ def _print_position(pb: dict[str, dict[str, float]]) -> str:
     return "\n".join(lines)
 
 
-def _print_per_question(per_q: dict[str, dict[str, JudgeAggregate]]) -> str:
+def _print_per_question(per_q: dict[str, dict[str, JudgeAggregate]],
+                        judge_order: list[str]) -> str:
     lines = ["\n=== PER-QUESTION breakdown (mean rank, lower=better; 7 reps each) ==="]
     header = ["q_id", "judge"] + list(ARMS)
     lines.append("  ".join(f"{h[:18]:<18}" for h in header))
     for q_id in QIDS:
-        for jl in JUDGES:
+        for jl in judge_order:
             agg = per_q.get(jl, {}).get(q_id)
             if not agg:
                 continue
@@ -417,43 +440,50 @@ def _print_per_question(per_q: dict[str, dict[str, JudgeAggregate]]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--json", help="optional output path for structured JSON dump")
+    parser.add_argument("--judges", default=None,
+                        help="comma-separated subset of judge labels to include "
+                        "(default: every judge_*.jsonl with data)")
     args = parser.parse_args()
 
-    opus_rows = _load_judge("opus")
-    sonnet_rows = _load_judge("sonnet")
+    if args.judges:
+        judge_order = [j.strip() for j in args.judges.split(",") if j.strip()]
+    else:
+        judge_order = _discover_judges()
 
-    if not opus_rows and not sonnet_rows:
+    if not judge_order:
         print("no judge output found in", SOBER_DIR, file=sys.stderr)
         return 1
 
+    rows_by_judge: dict[str, list[dict[str, Any]]] = {jl: _load_judge(jl) for jl in judge_order}
+    aggs: dict[str, JudgeAggregate] = {}
     out_lines: list[str] = []
-    out_lines.append(f"# Sober-State Ranking Analysis  (cross_arm/sober_state)")
-    out_lines.append(f"items per judge: opus={len(opus_rows)} sonnet={len(sonnet_rows)}")
+    out_lines.append("# Sober-State Ranking Analysis  (cross_arm/sober_state)")
+    out_lines.append("items per judge: " + " ".join(f"{jl}={len(rows_by_judge[jl])}"
+                                                    for jl in judge_order))
 
-    if opus_rows:
-        opus_agg = _aggregate(opus_rows)
-        out_lines.append(_print_judge(opus_agg))
-        out_lines.append(_print_position(_position_bias(opus_rows)))
-    else:
-        opus_agg = None
+    for jl in judge_order:
+        rows = rows_by_judge[jl]
+        if not rows:
+            out_lines.append(f"\n[skip] judge {jl}: no rows")
+            continue
+        agg = _aggregate(rows)
+        aggs[jl] = agg
+        out_lines.append(_print_judge(agg))
+        out_lines.append(_print_position(_position_bias(rows)))
 
-    if sonnet_rows:
-        sonnet_agg = _aggregate(sonnet_rows)
-        out_lines.append(_print_judge(sonnet_agg))
-        out_lines.append(_print_position(_position_bias(sonnet_rows)))
-    else:
-        sonnet_agg = None
+    # All-pairs cross-judge agreement.
+    judge_with_data = [jl for jl in judge_order if jl in aggs]
+    for i, a in enumerate(judge_with_data):
+        for b in judge_with_data[i + 1:]:
+            out_lines.append(_print_cross(_cross_judge(aggs[a], aggs[b]), a, b))
 
-    if opus_agg and sonnet_agg:
-        out_lines.append(_print_cross(_cross_judge(opus_agg, sonnet_agg)))
-
-    per_q: dict[str, dict[str, JudgeAggregate]] = {"opus": {}, "sonnet": {}}
-    if opus_rows:
-        per_q["opus"] = _per_question_aggregate(opus_rows)
-    if sonnet_rows:
-        per_q["sonnet"] = _per_question_aggregate(sonnet_rows)
+    per_q: dict[str, dict[str, JudgeAggregate]] = {jl: {} for jl in judge_order}
+    for jl in judge_order:
+        rows = rows_by_judge[jl]
+        if rows:
+            per_q[jl] = _per_question_aggregate(rows)
     if any(per_q.values()):
-        out_lines.append(_print_per_question(per_q))
+        out_lines.append(_print_per_question(per_q, judge_order))
 
     out_lines.append("\n=== EXISTING ABSOLUTE-JUDGE BASELINE (reasoning_quality, for comparison) ===")
     out_lines.append(f"{'arm':<22} " + " ".join(f"{q:<14}" for q in QIDS))
@@ -471,10 +501,13 @@ def main() -> int:
     print("\n".join(out_lines))
 
     if args.json:
-        dump = {
-            "opus": _agg_to_json(opus_agg) if opus_agg else None,
-            "sonnet": _agg_to_json(sonnet_agg) if sonnet_agg else None,
-            "cross_judge": _cross_judge(opus_agg, sonnet_agg).__dict__ if (opus_agg and sonnet_agg) else None,
+        dump: dict[str, Any] = {
+            "judges": {jl: _agg_to_json(aggs[jl]) for jl in judge_with_data},
+            "cross_judge_pairs": {
+                f"{a}__vs__{b}": _cross_judge(aggs[a], aggs[b]).__dict__
+                for i, a in enumerate(judge_with_data)
+                for b in judge_with_data[i + 1:]
+            },
         }
         Path(args.json).write_text(json.dumps(dump, indent=2))
         print(f"\nstructured dump → {args.json}")

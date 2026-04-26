@@ -67,7 +67,17 @@ HARNESS_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = HARNESS_ROOT.parent
 sys.path.insert(0, str(HARNESS_ROOT))
 
-from src.api import call_messages  # noqa: E402
+from src.api import (  # noqa: E402
+    CallResult,
+    _backoff,
+    _extract_gemini,
+    _extract_openai,
+    _gemini_stream_to_final,
+    _is_retriable_gemini,
+    _is_retriable_openai,
+    _openai_stream_to_final,
+    call_messages,
+)
 from src.config import (  # noqa: E402
     AuxModelConfig,
     ExperimentConfig,
@@ -196,13 +206,15 @@ OUTPUT — JSON only, no prose, no markdown fences:
 
 # ---- vendor-pricing snapshot (matches what arm.lock.json captured) ------
 
-# We need pricing only for the two judge models — both Anthropic. Pull from the
-# v1 base config so the cost line in the report matches the pricing the arms
-# were originally locked under.
+# We need pricing for every judge model. v1 (Anthropic-only) used opus + sonnet;
+# the v2 cross-vendor follow-ups add gpt-5.5 and gemini-3.1-pro. base.yaml
+# already carries pricing for all five families (see MULTI_VENDOR_ADDENDUM §6).
 def _load_judge_pricing(cfg: ExperimentConfig) -> dict[str, ModelPricing]:
     return {
         "opus_4_7": cfg.cost.pricing["opus_4_7"],
         "sonnet_4_6": cfg.cost.pricing["sonnet_4_6"],
+        "gpt_5_5": cfg.cost.pricing["gpt_5_5"],
+        "gemini_3_1_pro": cfg.cost.pricing["gemini_3_1_pro"],
     }
 
 
@@ -460,9 +472,14 @@ def _parse_judge_obj(text: str) -> dict[str, Any]:
 
 @dataclass
 class JudgeSpec:
-    label: str            # "opus" | "sonnet"
-    model: AuxModelConfig
-    pricing_key: str      # "opus_4_7" | "sonnet_4_6"
+    label: str                # "opus" | "sonnet" | "gpt" | "gemini"
+    vendor: str               # "anthropic" | "openai" | "google"
+    model: AuxModelConfig     # snapshot, max_output_tokens, temperature, thinking_effort
+    pricing_key: str          # key into base.yaml.cost.pricing
+    # Vendor-native thinking shape (None for Anthropic — uses model.thinking_effort).
+    # OpenAI: {"reasoning": {"effort": "xhigh", "summary": "auto"}}
+    # Gemini: {"thinking_level": "HIGH"}
+    vendor_config: dict[str, Any] | None = None
 
 
 # The instrument's default max_output_tokens (16K Opus / 8K Sonnet) is sized for
@@ -478,6 +495,15 @@ SOBER_OPUS_MAX_OUTPUT = 32_000
 # S-03 burn the entire output on thinking with zero visible text. 64K gives
 # enough headroom; Sonnet 4.6 supports 64K output.
 SOBER_SONNET_MAX_OUTPUT = 64_000
+# GPT-5.5 at reasoning.effort=xhigh: reasoning_tokens are bundled into
+# output_tokens. The analyst arm uses 128K for an 8-question batch; ranking is a
+# single-question / 5-candidate task — 64K is enough headroom for xhigh
+# reasoning + the per-candidate JSON scorecard + rationale.
+SOBER_GPT_MAX_OUTPUT = 64_000
+# Gemini 3.1 Pro at thinking_level=HIGH. Gemini 3 supports up to 65,536 output
+# tokens (per Google docs). 32K is sized to fit thinking + the ranking JSON;
+# bumps to 48K if first-pass cap-hits show up in cost.jsonl.
+SOBER_GEMINI_MAX_OUTPUT = 32_000
 
 
 def _override_max_tokens(model: AuxModelConfig, new_max: int) -> AuxModelConfig:
@@ -488,6 +514,203 @@ def _override_max_tokens(model: AuxModelConfig, new_max: int) -> AuxModelConfig:
         thinking_effort=model.thinking_effort,
     )
 
+
+def _effort_label(judge: JudgeSpec) -> str | None:
+    """Surface a vendor-comparable thinking-effort string for the persisted row.
+
+    Anthropic uses model.thinking_effort directly. OpenAI's knob lives at
+    vendor_config['reasoning']['effort']; Gemini's at vendor_config['thinking_level'].
+    """
+    if judge.vendor == "anthropic":
+        return judge.model.thinking_effort
+    cfg = judge.vendor_config or {}
+    if judge.vendor == "openai":
+        r = cfg.get("reasoning") or {}
+        return r.get("effort")
+    if judge.vendor == "google":
+        return cfg.get("thinking_level")
+    return None
+
+
+# ---- per-vendor judge calls ----------------------------------------------
+
+# Per-call wall-clock cap. Anthropic Opus at max-effort runs 100-200s in our
+# data; xhigh-effort GPT-5.5 and HIGH-effort Gemini 3 can be similar or longer
+# on this 5-way ranking. 1500s leaves headroom; the retry loop handles
+# upstream stream drops.
+_PER_CALL_TIMEOUT = 1500
+
+
+def _flatten_anthropic_system_blocks(blocks: list[dict[str, Any]]) -> str:
+    """Concatenate Anthropic-shaped system blocks into a single string for
+    OpenAI/Gemini, which take a flat instructions / system_instruction field.
+    cache_control hints are dropped — both vendors auto-cache by prefix match
+    when the same instructions blob is sent across calls within their TTL."""
+    parts: list[str] = []
+    for block in blocks:
+        if isinstance(block, dict) and block.get("type") == "text":
+            parts.append(block.get("text", "") or "")
+    return "\n\n".join(p for p in parts if p)
+
+
+async def _judge_call_anthropic(
+    *,
+    judge: JudgeSpec,
+    target: TargetBundle,
+    user_text: str,
+    client: AsyncAnthropic,
+    cfg: ExperimentConfig,
+) -> CallResult:
+    """Anthropic Opus/Sonnet judge — uses cached system blocks (5-min TTL)."""
+    system_blocks = _build_system_blocks_for_ranking(None, target)
+    return await call_messages(
+        client=client,
+        model=judge.model.snapshot,
+        system=system_blocks,
+        messages=[{"role": "user", "content": [{"type": "text", "text": user_text}]}],
+        max_tokens=judge.model.max_output_tokens,
+        temperature=judge.model.temperature,
+        thinking_effort=judge.model.thinking_effort,
+        extra_headers=None,
+        retry=cfg.execution.retry,
+        per_call_timeout_seconds=_PER_CALL_TIMEOUT,
+    )
+
+
+async def _judge_call_openai(
+    *,
+    judge: JudgeSpec,
+    target: TargetBundle,
+    user_text: str,
+    cfg: ExperimentConfig,
+) -> CallResult:
+    """GPT-5.5 judge via OpenAI Responses API. Auto-prefix-caching kicks in
+    after the first call when the same `instructions` blob (target materials +
+    ranking prompt) is repeated. Reasoning at xhigh; encrypted reasoning blob
+    captured for thinking-depth proxy. Streams the response so xhigh-effort
+    multi-minute calls don't hit the OpenAI non-streaming wall-clock cap."""
+    from openai import AsyncOpenAI
+
+    instructions = _flatten_anthropic_system_blocks(
+        _build_system_blocks_for_ranking(None, target)
+    )
+    vendor_cfg = judge.vendor_config or {}
+    reasoning_cfg = vendor_cfg.get("reasoning") or {"effort": "xhigh", "summary": "auto"}
+    if "summary" not in reasoning_cfg:
+        reasoning_cfg = {**reasoning_cfg, "summary": "auto"}
+
+    client = AsyncOpenAI()
+    retry = cfg.execution.retry
+    attempt = 0
+    t_start_total = time.monotonic()
+    try:
+        while True:
+            attempt += 1
+            t0 = time.monotonic()
+            try:
+                response = await asyncio.wait_for(
+                    _openai_stream_to_final(
+                        client,
+                        model=judge.model.snapshot,
+                        instructions=instructions,
+                        input_text=user_text,
+                        reasoning=reasoning_cfg,
+                        max_output_tokens=judge.model.max_output_tokens,
+                        temperature=judge.model.temperature,
+                    ),
+                    timeout=_PER_CALL_TIMEOUT,
+                )
+                latency = time.monotonic() - t0
+                return _extract_openai(response, latency=latency, attempts=attempt)
+            except Exception as e:  # noqa: BLE001
+                if not _is_retriable_openai(e) or attempt >= retry.max_attempts:
+                    log.warning(
+                        "openai judge call failed after %d attempts (%.1fs total): %s",
+                        attempt, time.monotonic() - t_start_total, e,
+                    )
+                    raise
+                delay = _backoff(attempt, retry)
+                log.info("openai judge retry %d/%d in %.1fs: %s",
+                         attempt, retry.max_attempts, delay, e)
+                await asyncio.sleep(delay)
+    finally:
+        try:
+            await client.close()
+        except Exception:  # noqa: BLE001
+            pass
+
+
+async def _judge_call_gemini(
+    *,
+    judge: JudgeSpec,
+    target: TargetBundle,
+    user_text: str,
+    cfg: ExperimentConfig,
+) -> CallResult:
+    """Gemini 3.1 Pro judge via google-genai. system_instruction holds the
+    target materials + ranking prompt; subsequent calls hit Gemini's implicit
+    prefix cache. thinking_level=HIGH is the vendor max; include_thoughts=True
+    surfaces thought parts for the signature_chars proxy."""
+    from google import genai
+    from google.genai import types as gtypes
+
+    instructions = _flatten_anthropic_system_blocks(
+        _build_system_blocks_for_ranking(None, target)
+    )
+    vendor_cfg = judge.vendor_config or {}
+    level_str = str(vendor_cfg.get("thinking_level", "HIGH")).upper()
+    try:
+        thinking_level = getattr(gtypes.ThinkingLevel, level_str)
+    except AttributeError as e:
+        raise ValueError(
+            f"unknown gemini thinking_level {level_str!r}; valid: MINIMAL, LOW, MEDIUM, HIGH"
+        ) from e
+
+    gen_config = gtypes.GenerateContentConfig(
+        system_instruction=instructions or None,
+        temperature=judge.model.temperature,
+        max_output_tokens=judge.model.max_output_tokens,
+        thinking_config=gtypes.ThinkingConfig(
+            thinking_level=thinking_level,
+            include_thoughts=True,
+        ),
+    )
+
+    client = genai.Client()
+    retry = cfg.execution.retry
+    attempt = 0
+    t_start_total = time.monotonic()
+    while True:
+        attempt += 1
+        t0 = time.monotonic()
+        try:
+            response = await asyncio.wait_for(
+                _gemini_stream_to_final(
+                    client,
+                    model=judge.model.snapshot,
+                    contents=user_text,
+                    config=gen_config,
+                ),
+                timeout=_PER_CALL_TIMEOUT,
+            )
+            latency = time.monotonic() - t0
+            return _extract_gemini(
+                response, latency=latency, attempts=attempt, snapshot=judge.model.snapshot,
+            )
+        except Exception as e:  # noqa: BLE001
+            if not _is_retriable_gemini(e) or attempt >= retry.max_attempts:
+                log.warning(
+                    "gemini judge call failed after %d attempts (%.1fs total): %s",
+                    attempt, time.monotonic() - t_start_total, e,
+                )
+                raise
+            delay = _backoff(attempt, retry)
+            log.info("gemini judge retry %d/%d in %.1fs: %s",
+                     attempt, retry.max_attempts, delay, e)
+            await asyncio.sleep(delay)
+
+
+# ---- main per-bundle driver ----------------------------------------------
 
 async def _run_one(
     *,
@@ -501,22 +724,23 @@ async def _run_one(
     pricing: dict[str, ModelPricing],
     cost_log_path: Path,
 ) -> dict[str, Any]:
-    system_blocks = _build_system_blocks_for_ranking(None, target)
     user_text = _build_user_text(bundle, question_prompt, gt)
 
     t0 = time.monotonic()
-    result = await call_messages(
-        client=client,
-        model=judge.model.snapshot,
-        system=system_blocks,
-        messages=[{"role": "user", "content": [{"type": "text", "text": user_text}]}],
-        max_tokens=judge.model.max_output_tokens,
-        temperature=judge.model.temperature,
-        thinking_effort=judge.model.thinking_effort,
-        extra_headers=None,
-        retry=cfg.execution.retry,
-        per_call_timeout_seconds=1500,
-    )
+    if judge.vendor == "anthropic":
+        result = await _judge_call_anthropic(
+            judge=judge, target=target, user_text=user_text, client=client, cfg=cfg,
+        )
+    elif judge.vendor == "openai":
+        result = await _judge_call_openai(
+            judge=judge, target=target, user_text=user_text, cfg=cfg,
+        )
+    elif judge.vendor == "google":
+        result = await _judge_call_gemini(
+            judge=judge, target=target, user_text=user_text, cfg=cfg,
+        )
+    else:
+        raise ValueError(f"unknown judge vendor {judge.vendor!r}")
     elapsed = time.monotonic() - t0
 
     parsed = _parse_judge_obj(result.text)
@@ -548,8 +772,9 @@ async def _run_one(
     return {
         "_ts": time.time(),
         "judge": judge.label,
+        "judge_vendor": judge.vendor,
         "judge_model": judge.model.snapshot,
-        "judge_thinking_effort": judge.model.thinking_effort,
+        "judge_thinking_effort": _effort_label(judge),
         "q_id": bundle.q_id,
         "rep_idx": bundle.rep_idx,
         "permutation": list(bundle.permutation),     # arms in label order [A,B,C,D,E]
@@ -658,10 +883,95 @@ async def _drive(judges: list[JudgeSpec], concurrency: int, cfg: ExperimentConfi
 
 # ---- CLI -----------------------------------------------------------------
 
+_KNOWN_JUDGE_LABELS = ("opus", "sonnet", "gpt", "gemini")
+
+
+def _parse_judges_arg(raw: str) -> list[str]:
+    """Accepts: legacy {primary, secondary, both}; new {opus, sonnet, gpt,
+    gemini, all}; or comma-separated combinations e.g. `gemini,gpt`."""
+    raw = raw.strip().lower()
+    if raw == "primary":
+        return ["opus"]
+    if raw == "secondary":
+        return ["sonnet"]
+    if raw == "both":
+        return ["opus", "sonnet"]
+    if raw == "all":
+        return list(_KNOWN_JUDGE_LABELS)
+    parts = [p.strip() for p in raw.split(",") if p.strip()]
+    bad = [p for p in parts if p not in _KNOWN_JUDGE_LABELS]
+    if bad:
+        raise SystemExit(
+            f"unknown judge label(s): {bad}. Valid: {list(_KNOWN_JUDGE_LABELS)} "
+            "(or aliases: primary, secondary, both, all)"
+        )
+    return parts
+
+
+def _build_judge_spec(label: str, cfg: ExperimentConfig) -> JudgeSpec:
+    """Materialize a JudgeSpec for one of the four supported judge labels.
+
+    The two Anthropic specs reuse the held-constant judge_primary/secondary
+    AuxModelConfig from base.yaml (same instrument as the regular grading
+    pipeline). The two cross-vendor specs are constructed locally — we don't
+    inherit from base.yaml because base.yaml's judge slots are Anthropic-only
+    by design (DESIGN.md §8.3). Vendor snapshots match the analyst arms so
+    the cross-vendor judge follow-up uses each vendor's same flagship at its
+    same vendor-max thinking knob (apples-to-apples judge swap)."""
+    if label == "opus":
+        return JudgeSpec(
+            label="opus",
+            vendor="anthropic",
+            model=_override_max_tokens(cfg.models.judge_primary, SOBER_OPUS_MAX_OUTPUT),
+            pricing_key="opus_4_7",
+        )
+    if label == "sonnet":
+        return JudgeSpec(
+            label="sonnet",
+            vendor="anthropic",
+            model=_override_max_tokens(cfg.models.judge_secondary, SOBER_SONNET_MAX_OUTPUT),
+            pricing_key="sonnet_4_6",
+        )
+    if label == "gpt":
+        return JudgeSpec(
+            label="gpt",
+            vendor="openai",
+            model=AuxModelConfig(
+                snapshot="gpt-5.5-2026-04-23",
+                max_output_tokens=SOBER_GPT_MAX_OUTPUT,
+                temperature=1.0,
+                thinking_effort=None,  # Anthropic knob; OpenAI uses vendor_config
+            ),
+            pricing_key="gpt_5_5",
+            vendor_config={"reasoning": {"effort": "xhigh", "summary": "auto"}},
+        )
+    if label == "gemini":
+        return JudgeSpec(
+            label="gemini",
+            vendor="google",
+            model=AuxModelConfig(
+                snapshot="gemini-3-pro-preview",
+                max_output_tokens=SOBER_GEMINI_MAX_OUTPUT,
+                temperature=1.0,
+                thinking_effort=None,  # Anthropic knob; Gemini uses vendor_config
+            ),
+            pricing_key="gemini_3_1_pro",
+            vendor_config={"thinking_level": "HIGH"},
+        )
+    raise ValueError(f"unknown judge label {label!r}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Sober-state head-to-head ranking judge.")
-    parser.add_argument("--judges", choices=["primary", "secondary", "both"], default="both",
-                        help="primary=Opus 4.7 max; secondary=Sonnet 4.6 high")
+    parser.add_argument(
+        "--judges", default="both",
+        help=(
+            "Which judge(s) to run. Single labels: opus, sonnet, gpt, gemini. "
+            "Aliases: primary (=opus), secondary (=sonnet), both (=opus,sonnet), "
+            "all (=opus,sonnet,gpt,gemini). Comma-separated combinations OK, "
+            "e.g. --judges gemini,gpt for the cross-vendor follow-up."
+        ),
+    )
     parser.add_argument("--concurrency", type=int, default=3,
                         help="concurrent judge calls (keep small to amortize 5-min cache)")
     parser.add_argument("--anchor-arm", default="opus-4-7",
@@ -678,30 +988,27 @@ def main() -> int:
     load_dotenv(PROJECT_ROOT / "harness" / ".env")
 
     cfg = load_arm_config(args.anchor_arm)
+    judges: list[JudgeSpec] = [_build_judge_spec(lbl, cfg) for lbl in _parse_judges_arg(args.judges)]
 
-    judges: list[JudgeSpec] = []
-    if args.judges in ("primary", "both"):
-        judges.append(JudgeSpec(
-            label="opus",
-            model=_override_max_tokens(cfg.models.judge_primary, SOBER_OPUS_MAX_OUTPUT),
-            pricing_key="opus_4_7",
-        ))
-    if args.judges in ("secondary", "both"):
-        judges.append(JudgeSpec(
-            label="sonnet",
-            model=_override_max_tokens(cfg.models.judge_secondary, SOBER_SONNET_MAX_OUTPUT),
-            pricing_key="sonnet_4_6",
-        ))
+    # Fail fast if a non-Anthropic judge was requested but its API key is missing.
+    for j in judges:
+        if j.vendor == "openai" and not os.environ.get("OPENAI_API_KEY"):
+            raise SystemExit("OPENAI_API_KEY not set in environment — required for --judges gpt")
+        if j.vendor == "google" and not (
+            os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        ):
+            raise SystemExit(
+                "GEMINI_API_KEY (or GOOGLE_API_KEY) not set in environment — required for --judges gemini"
+            )
 
     if args.dry_run:
         bundles = build_all_bundles()
         print(f"would run {len(bundles)} bundles × {len(judges)} judge(s) = {len(bundles)*len(judges)} calls")
         for j in judges:
-            print(f"  judge={j.label} model={j.model.snapshot} effort={j.model.thinking_effort}")
-        out = _judge_path(judges[0].label) if judges else None
-        if out:
-            existing = _existing_keys(out)
-            print(f"  existing rows in {out.name}: {len(existing)}")
+            print(f"  judge={j.label} vendor={j.vendor} model={j.model.snapshot} "
+                  f"effort={_effort_label(j)} max_out={j.model.max_output_tokens}")
+            existing = _existing_keys(_judge_path(j.label))
+            print(f"    existing rows in judge_{j.label}.jsonl: {len(existing)}")
         print(f"output dir: {OUT_DIR}")
         return 0
 

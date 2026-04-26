@@ -1,0 +1,463 @@
+{
+  "judges": {
+    "opus": {
+      "judge": "opus",
+      "n_items": 21,
+      "mean_rank": {
+        "opus-4-7": 1.619047619047619,
+        "sonnet-4-6": 1.4761904761904763,
+        "gpt-5-5": 3.0,
+        "gemini-3-1-pro": 4.666666666666667,
+        "deepseek-v4-pro": 4.238095238095238
+      },
+      "borda_total": {
+        "opus-4-7": 71,
+        "sonnet-4-6": 74,
+        "gpt-5-5": 42,
+        "gemini-3-1-pro": 7,
+        "deepseek-v4-pro": 16
+      },
+      "borda_mean": {
+        "opus-4-7": 3.380952380952381,
+        "sonnet-4-6": 3.5238095238095237,
+        "gpt-5-5": 2.0,
+        "gemini-3-1-pro": 0.3333333333333333,
+        "deepseek-v4-pro": 0.7619047619047619
+      },
+      "win_matrix": {
+        "opus-4-7->sonnet-4-6": 9,
+        "opus-4-7->gpt-5-5": 20,
+        "opus-4-7->gemini-3-1-pro": 21,
+        "opus-4-7->deepseek-v4-pro": 21,
+        "sonnet-4-6->gpt-5-5": 20,
+        "sonnet-4-6->gemini-3-1-pro": 21,
+        "sonnet-4-6->deepseek-v4-pro": 21,
+        "gpt-5-5->gemini-3-1-pro": 21,
+        "gpt-5-5->deepseek-v4-pro": 19,
+        "gemini-3-1-pro->deepseek-v4-pro": 7,
+        "sonnet-4-6->opus-4-7": 12,
+        "deepseek-v4-pro->gemini-3-1-pro": 14,
+        "deepseek-v4-pro->gpt-5-5": 2,
+        "gpt-5-5->sonnet-4-6": 1,
+        "gpt-5-5->opus-4-7": 1
+      },
+      "per_dim_mean": {
+        "groundedness": {
+          "opus-4-7": 4.9523809523809526,
+          "sonnet-4-6": 5.0,
+          "gpt-5-5": 5.0,
+          "gemini-3-1-pro": 3.857142857142857,
+          "deepseek-v4-pro": 3.857142857142857
+        },
+        "evidentiary_breadth": {
+          "opus-4-7": 4.761904761904762,
+          "sonnet-4-6": 4.904761904761905,
+          "gpt-5-5": 4.142857142857143,
+          "gemini-3-1-pro": 3.0952380952380953,
+          "deepseek-v4-pro": 3.4285714285714284
+        },
+        "scope_adherence": {
+          "opus-4-7": 5.0,
+          "sonnet-4-6": 5.0,
+          "gpt-5-5": 5.0,
+          "gemini-3-1-pro": 4.9523809523809526,
+          "deepseek-v4-pro": 4.857142857142857
+        },
+        "clarity": {
+          "opus-4-7": 4.809523809523809,
+          "sonnet-4-6": 4.571428571428571,
+          "gpt-5-5": 4.142857142857143,
+          "gemini-3-1-pro": 4.095238095238095,
+          "deepseek-v4-pro": 4.095238095238095
+        },
+        "citation_accuracy": {
+          "opus-4-7": 4.9523809523809526,
+          "sonnet-4-6": 5.0,
+          "gpt-5-5": 4.904761904761905,
+          "gemini-3-1-pro": 3.4761904761904763,
+          "deepseek-v4-pro": 3.4761904761904763
+        }
+      },
+      "rq_mean": {
+        "opus-4-7": 8.619047619047619,
+        "sonnet-4-6": 9.0,
+        "gpt-5-5": 7.476190476190476,
+        "gemini-3-1-pro": 5.476190476190476,
+        "deepseek-v4-pro": 5.904761904761905
+      },
+      "rq_stdev": {
+        "opus-4-7": 0.4856209060564557,
+        "sonnet-4-6": 0.5345224838248488,
+        "gpt-5-5": 0.6632565846278152,
+        "gemini-3-1-pro": 0.6632565846278152,
+        "deepseek-v4-pro": 0.6834619092574916
+      },
+      "unsup_mean": {
+        "opus-4-7": 0.09523809523809523,
+        "sonnet-4-6": 0.0,
+        "gpt-5-5": 0.0,
+        "gemini-3-1-pro": 0.3333333333333333,
+        "deepseek-v4-pro": 0.47619047619047616
+      }
+    },
+    "sonnet": {
+      "judge": "sonnet",
+      "n_items": 21,
+      "mean_rank": {
+        "opus-4-7": 1.7619047619047619,
+        "sonnet-4-6": 1.3333333333333333,
+        "gpt-5-5": 2.9523809523809526,
+        "gemini-3-1-pro": 4.761904761904762,
+        "deepseek-v4-pro": 4.190476190476191
+      },
+      "borda_total": {
+        "opus-4-7": 68,
+        "sonnet-4-6": 77,
+        "gpt-5-5": 43,
+        "gemini-3-1-pro": 5,
+        "deepseek-v4-pro": 17
+      },
+      "borda_mean": {
+        "opus-4-7": 3.238095238095238,
+        "sonnet-4-6": 3.6666666666666665,
+        "gpt-5-5": 2.0476190476190474,
+        "gemini-3-1-pro": 0.23809523809523808,
+        "deepseek-v4-pro": 0.8095238095238095
+      },
+      "win_matrix": {
+        "sonnet-4-6->opus-4-7": 15,
+        "sonnet-4-6->gpt-5-5": 20,
+        "sonnet-4-6->gemini-3-1-pro": 21,
+        "sonnet-4-6->deepseek-v4-pro": 21,
+        "opus-4-7->gpt-5-5": 20,
+        "opus-4-7->gemini-3-1-pro": 21,
+        "opus-4-7->deepseek-v4-pro": 21,
+        "gpt-5-5->gemini-3-1-pro": 21,
+        "gpt-5-5->deepseek-v4-pro": 20,
+        "gemini-3-1-pro->deepseek-v4-pro": 5,
+        "gpt-5-5->sonnet-4-6": 1,
+        "gpt-5-5->opus-4-7": 1,
+        "deepseek-v4-pro->gemini-3-1-pro": 16,
+        "opus-4-7->sonnet-4-6": 6,
+        "deepseek-v4-pro->gpt-5-5": 1
+      },
+      "per_dim_mean": {
+        "groundedness": {
+          "opus-4-7": 4.666666666666667,
+          "sonnet-4-6": 4.9523809523809526,
+          "gpt-5-5": 4.666666666666667,
+          "gemini-3-1-pro": 3.6666666666666665,
+          "deepseek-v4-pro": 3.8095238095238093
+        },
+        "evidentiary_breadth": {
+          "opus-4-7": 4.285714285714286,
+          "sonnet-4-6": 4.380952380952381,
+          "gpt-5-5": 3.7142857142857144,
+          "gemini-3-1-pro": 2.7142857142857144,
+          "deepseek-v4-pro": 3.2857142857142856
+        },
+        "scope_adherence": {
+          "opus-4-7": 5.0,
+          "sonnet-4-6": 5.0,
+          "gpt-5-5": 5.0,
+          "gemini-3-1-pro": 4.9523809523809526,
+          "deepseek-v4-pro": 5.0
+        },
+        "clarity": {
+          "opus-4-7": 4.857142857142857,
+          "sonnet-4-6": 4.857142857142857,
+          "gpt-5-5": 3.6666666666666665,
+          "gemini-3-1-pro": 3.761904761904762,
+          "deepseek-v4-pro": 4.0476190476190474
+        },
+        "citation_accuracy": {
+          "opus-4-7": 4.476190476190476,
+          "sonnet-4-6": 4.9523809523809526,
+          "gpt-5-5": 4.476190476190476,
+          "gemini-3-1-pro": 3.3333333333333335,
+          "deepseek-v4-pro": 3.380952380952381
+        }
+      },
+      "rq_mean": {
+        "opus-4-7": 8.285714285714286,
+        "sonnet-4-6": 8.80952380952381,
+        "gpt-5-5": 6.9523809523809526,
+        "gemini-3-1-pro": 5.0476190476190474,
+        "deepseek-v4-pro": 5.761904761904762
+      },
+      "rq_stdev": {
+        "opus-4-7": 0.45175395145262565,
+        "sonnet-4-6": 0.392676726249301,
+        "gpt-5-5": 0.7221786137191953,
+        "gemini-3-1-pro": 0.7221786137191953,
+        "deepseek-v4-pro": 0.5259695722470125
+      },
+      "unsup_mean": {
+        "opus-4-7": 0.3333333333333333,
+        "sonnet-4-6": 0.047619047619047616,
+        "gpt-5-5": 0.09523809523809523,
+        "gemini-3-1-pro": 0.7142857142857143,
+        "deepseek-v4-pro": 0.6666666666666666
+      }
+    },
+    "gpt": {
+      "judge": "gpt",
+      "n_items": 21,
+      "mean_rank": {
+        "opus-4-7": 1.9523809523809523,
+        "sonnet-4-6": 2.238095238095238,
+        "gpt-5-5": 1.9523809523809523,
+        "gemini-3-1-pro": 4.761904761904762,
+        "deepseek-v4-pro": 4.095238095238095
+      },
+      "borda_total": {
+        "opus-4-7": 64,
+        "sonnet-4-6": 58,
+        "gpt-5-5": 64,
+        "gemini-3-1-pro": 5,
+        "deepseek-v4-pro": 19
+      },
+      "borda_mean": {
+        "opus-4-7": 3.0476190476190474,
+        "sonnet-4-6": 2.761904761904762,
+        "gpt-5-5": 3.0476190476190474,
+        "gemini-3-1-pro": 0.23809523809523808,
+        "deepseek-v4-pro": 0.9047619047619048
+      },
+      "win_matrix": {
+        "opus-4-7->gpt-5-5": 13,
+        "opus-4-7->sonnet-4-6": 11,
+        "opus-4-7->deepseek-v4-pro": 20,
+        "opus-4-7->gemini-3-1-pro": 20,
+        "gpt-5-5->sonnet-4-6": 14,
+        "gpt-5-5->deepseek-v4-pro": 21,
+        "gpt-5-5->gemini-3-1-pro": 21,
+        "sonnet-4-6->deepseek-v4-pro": 20,
+        "sonnet-4-6->gemini-3-1-pro": 21,
+        "deepseek-v4-pro->gemini-3-1-pro": 17,
+        "gpt-5-5->opus-4-7": 8,
+        "sonnet-4-6->opus-4-7": 10,
+        "deepseek-v4-pro->sonnet-4-6": 1,
+        "sonnet-4-6->gpt-5-5": 7,
+        "gemini-3-1-pro->deepseek-v4-pro": 4,
+        "gemini-3-1-pro->opus-4-7": 1,
+        "deepseek-v4-pro->opus-4-7": 1
+      },
+      "per_dim_mean": {
+        "groundedness": {
+          "opus-4-7": 4.285714285714286,
+          "sonnet-4-6": 3.9047619047619047,
+          "gpt-5-5": 5.0,
+          "gemini-3-1-pro": 3.7142857142857144,
+          "deepseek-v4-pro": 3.4761904761904763
+        },
+        "evidentiary_breadth": {
+          "opus-4-7": 4.380952380952381,
+          "sonnet-4-6": 4.380952380952381,
+          "gpt-5-5": 3.9523809523809526,
+          "gemini-3-1-pro": 3.3333333333333335,
+          "deepseek-v4-pro": 3.5714285714285716
+        },
+        "scope_adherence": {
+          "opus-4-7": 5.0,
+          "sonnet-4-6": 5.0,
+          "gpt-5-5": 5.0,
+          "gemini-3-1-pro": 4.9523809523809526,
+          "deepseek-v4-pro": 5.0
+        },
+        "clarity": {
+          "opus-4-7": 4.809523809523809,
+          "sonnet-4-6": 4.857142857142857,
+          "gpt-5-5": 4.761904761904762,
+          "gemini-3-1-pro": 4.238095238095238,
+          "deepseek-v4-pro": 4.238095238095238
+        },
+        "citation_accuracy": {
+          "opus-4-7": 4.238095238095238,
+          "sonnet-4-6": 4.0,
+          "gpt-5-5": 4.9523809523809526,
+          "gemini-3-1-pro": 3.2857142857142856,
+          "deepseek-v4-pro": 3.3333333333333335
+        }
+      },
+      "rq_mean": {
+        "opus-4-7": 8.238095238095237,
+        "sonnet-4-6": 8.238095238095237,
+        "gpt-5-5": 8.095238095238095,
+        "gemini-3-1-pro": 5.476190476190476,
+        "deepseek-v4-pro": 6.238095238095238
+      },
+      "rq_stdev": {
+        "opus-4-7": 0.7499055118106487,
+        "sonnet-4-6": 0.6834619092574916,
+        "gpt-5-5": 0.6098213559459856,
+        "gemini-3-1-pro": 0.7315376902732008,
+        "deepseek-v4-pro": 0.6834619092574916
+      },
+      "unsup_mean": {
+        "opus-4-7": 2.0476190476190474,
+        "sonnet-4-6": 3.7142857142857144,
+        "gpt-5-5": 0.09523809523809523,
+        "gemini-3-1-pro": 2.0952380952380953,
+        "deepseek-v4-pro": 3.4761904761904763
+      }
+    },
+    "gemini": {
+      "judge": "gemini",
+      "n_items": 21,
+      "mean_rank": {
+        "opus-4-7": 1.6666666666666667,
+        "sonnet-4-6": 1.4285714285714286,
+        "gpt-5-5": 3.238095238095238,
+        "gemini-3-1-pro": 4.476190476190476,
+        "deepseek-v4-pro": 4.190476190476191
+      },
+      "borda_total": {
+        "opus-4-7": 70,
+        "sonnet-4-6": 75,
+        "gpt-5-5": 37,
+        "gemini-3-1-pro": 11,
+        "deepseek-v4-pro": 17
+      },
+      "borda_mean": {
+        "opus-4-7": 3.3333333333333335,
+        "sonnet-4-6": 3.5714285714285716,
+        "gpt-5-5": 1.7619047619047619,
+        "gemini-3-1-pro": 0.5238095238095238,
+        "deepseek-v4-pro": 0.8095238095238095
+      },
+      "win_matrix": {
+        "opus-4-7->sonnet-4-6": 8,
+        "opus-4-7->gpt-5-5": 20,
+        "opus-4-7->deepseek-v4-pro": 21,
+        "opus-4-7->gemini-3-1-pro": 21,
+        "sonnet-4-6->gpt-5-5": 20,
+        "sonnet-4-6->deepseek-v4-pro": 21,
+        "sonnet-4-6->gemini-3-1-pro": 21,
+        "gpt-5-5->deepseek-v4-pro": 16,
+        "gpt-5-5->gemini-3-1-pro": 19,
+        "deepseek-v4-pro->gemini-3-1-pro": 12,
+        "sonnet-4-6->opus-4-7": 13,
+        "gemini-3-1-pro->deepseek-v4-pro": 9,
+        "gpt-5-5->sonnet-4-6": 1,
+        "gpt-5-5->opus-4-7": 1,
+        "deepseek-v4-pro->gpt-5-5": 5,
+        "gemini-3-1-pro->gpt-5-5": 2
+      },
+      "per_dim_mean": {
+        "groundedness": {
+          "opus-4-7": 4.761904761904762,
+          "sonnet-4-6": 4.904761904761905,
+          "gpt-5-5": 5.0,
+          "gemini-3-1-pro": 4.380952380952381,
+          "deepseek-v4-pro": 4.380952380952381
+        },
+        "evidentiary_breadth": {
+          "opus-4-7": 4.761904761904762,
+          "sonnet-4-6": 4.523809523809524,
+          "gpt-5-5": 4.238095238095238,
+          "gemini-3-1-pro": 3.761904761904762,
+          "deepseek-v4-pro": 3.761904761904762
+        },
+        "scope_adherence": {
+          "opus-4-7": 5.0,
+          "sonnet-4-6": 5.0,
+          "gpt-5-5": 5.0,
+          "gemini-3-1-pro": 4.9523809523809526,
+          "deepseek-v4-pro": 5.0
+        },
+        "clarity": {
+          "opus-4-7": 5.0,
+          "sonnet-4-6": 4.904761904761905,
+          "gpt-5-5": 3.6666666666666665,
+          "gemini-3-1-pro": 4.285714285714286,
+          "deepseek-v4-pro": 4.285714285714286
+        },
+        "citation_accuracy": {
+          "opus-4-7": 4.809523809523809,
+          "sonnet-4-6": 5.0,
+          "gpt-5-5": 4.904761904761905,
+          "gemini-3-1-pro": 4.190476190476191,
+          "deepseek-v4-pro": 4.428571428571429
+        }
+      },
+      "rq_mean": {
+        "opus-4-7": 9.238095238095237,
+        "sonnet-4-6": 9.523809523809524,
+        "gpt-5-5": 7.428571428571429,
+        "gemini-3-1-pro": 5.9523809523809526,
+        "deepseek-v4-pro": 6.428571428571429
+      },
+      "rq_stdev": {
+        "opus-4-7": 0.8109231602822096,
+        "sonnet-4-6": 0.5870870479018073,
+        "gpt-5-5": 0.9035079029052513,
+        "gemini-3-1-pro": 0.9988655696858586,
+        "deepseek-v4-pro": 0.9547589359887344
+      },
+      "unsup_mean": {
+        "opus-4-7": 0.2857142857142857,
+        "sonnet-4-6": 0.09523809523809523,
+        "gpt-5-5": 0.0,
+        "gemini-3-1-pro": 0.5238095238095238,
+        "deepseek-v4-pro": 0.6666666666666666
+      }
+    }
+  },
+  "cross_judge_pairs": {
+    "opus__vs__sonnet": {
+      "n_overlap_items": 21,
+      "per_item_spearman_mean": 0.9428571428571428,
+      "per_item_spearman_median": 1.0,
+      "per_arm_borda_pearson": 0.9970111756909205,
+      "per_arm_rank_pearson": 0.9970111756909206,
+      "rank_agreement_top1": 0.7619047619047619,
+      "rank_agreement_topk_3": 0.8571428571428571
+    },
+    "opus__vs__gpt": {
+      "n_overlap_items": 21,
+      "per_item_spearman_mean": 0.7142857142857143,
+      "per_item_spearman_median": 0.8,
+      "per_arm_borda_pearson": 0.8874529658615381,
+      "per_arm_rank_pearson": 0.8874529658615383,
+      "rank_agreement_top1": 0.47619047619047616,
+      "rank_agreement_topk_3": 0.8095238095238095
+    },
+    "opus__vs__gemini": {
+      "n_overlap_items": 21,
+      "per_item_spearman_mean": 0.8380952380952381,
+      "per_item_spearman_median": 0.8,
+      "per_arm_borda_pearson": 0.9946837685950704,
+      "per_arm_rank_pearson": 0.9946837685950704,
+      "rank_agreement_top1": 0.47619047619047616,
+      "rank_agreement_topk_3": 0.7619047619047619
+    },
+    "sonnet__vs__gpt": {
+      "n_overlap_items": 21,
+      "per_item_spearman_mean": 0.7285714285714286,
+      "per_item_spearman_median": 0.7,
+      "per_arm_borda_pearson": 0.8882914663777515,
+      "per_arm_rank_pearson": 0.8882914663777515,
+      "rank_agreement_top1": 0.38095238095238093,
+      "rank_agreement_topk_3": 0.8571428571428571
+    },
+    "sonnet__vs__gemini": {
+      "n_overlap_items": 21,
+      "per_item_spearman_mean": 0.8428571428571429,
+      "per_item_spearman_median": 0.9,
+      "per_arm_borda_pearson": 0.9907049140944935,
+      "per_arm_rank_pearson": 0.9907049140944935,
+      "rank_agreement_top1": 0.5238095238095238,
+      "rank_agreement_topk_3": 0.8095238095238095
+    },
+    "gpt__vs__gemini": {
+      "n_overlap_items": 21,
+      "per_item_spearman_mean": 0.7238095238095238,
+      "per_item_spearman_median": 0.7,
+      "per_arm_borda_pearson": 0.8356486015048509,
+      "per_arm_rank_pearson": 0.8356486015048509,
+      "rank_agreement_top1": 0.47619047619047616,
+      "rank_agreement_topk_3": 0.6666666666666666
+    }
+  }
+}

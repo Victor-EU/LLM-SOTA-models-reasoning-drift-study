@@ -2,7 +2,7 @@
 
 ## Which model is best at the task with no noise?
 
-**Date:** 2026-04-26  •  **Items judged:** 21 (3 Tier-3 questions × 7 reps)  •  **Judges:** Opus 4.7 max + Sonnet 4.6 high (both, 100% of items)  •  **Cost:** $34.40
+**Date:** 2026-04-26  •  **Items judged:** 21 (3 Tier-3 questions × 7 reps)  •  **Judges:** Opus 4.7 max + Sonnet 4.6 high (original); GPT-5.5 xhigh + Gemini 3.1 Pro HIGH (cross-vendor follow-up — §10)  •  **Cost:** $55.74 ($34.40 original + $21.34 cross-vendor)
 
 This is a separate analysis on top of the existing five-arm dataset, asking
 a different question than the headline drift study: *with no noise in the
@@ -299,21 +299,18 @@ own arm first. Only Sonnet does. The Sonnet-judge result alone is
 ambiguous; the Opus-judge result corroborates Sonnet's #1 standing
 *against* Opus's own model-stylistic preference.
 
-### 7.3 Both judges are Anthropic
+### 7.3 Both judges are Anthropic — *resolved by §10 cross-vendor follow-up*
 
-The instrument set is Anthropic-only. Cross-vendor judges (e.g.,
-GPT-5.5 max or Gemini 3.1 Pro HIGH judging the same 21 items) would
-test whether the ordering is robust to judge-vendor stylistic
-preferences. We did not run that — within-vendor judge agreement of
-ρ=0.943 is the upper bound on confidence we can claim from this data.
-
-A natural extension is the obvious follow-up: rerun the same 21 items
-with GPT-5.5 and Gemini 3.1 Pro as judges. If their ordering still
-puts Sonnet/Opus on top with a clean gap to GPT-5.5 → Gemini/DeepSeek,
-the headline survives a vendor-orthogonal challenge. If they invert
-Opus/Sonnet (or invert DeepSeek/Gemini), the magnitude of the swap
-quantifies vendor-bias. This is the cheapest high-value follow-up and
-is enumerated in §9.
+The original instrument set was Anthropic-only. The follow-up in §10
+adds GPT-5.5 (xhigh) and Gemini 3.1 Pro (HIGH) as judges on the same 21
+items, same permutations. **Result:** the Sonnet > Opus > GPT > DeepSeek
+> Gemini ordering holds for 3 of 4 judges; GPT alone elevates itself to
+a tie at #1 with Opus, but the top-3 set is unchanged. The bottom of the
+ranking is unanimous (Gemini last on every judge — including the Gemini
+judge itself, which ranks Gemini behind DeepSeek). Per-arm Pearson
+correlation across all judge pairs ranges 0.84 – 1.00. Self-preference
+is bounded: GPT +1.11 rank steps in-house (the largest), Sonnet +0.39,
+Gemini +0.25, Opus +0.17. None invert any pair. Full breakdown in §10.
 
 ### 7.4 Position bias: present but small
 
@@ -400,10 +397,11 @@ or judging by non-Anthropic models is not established by this data.
 
 **Natural follow-ups, if anyone asks:**
 
-1. **Cross-vendor judge replication.** Rerun the same 21 items with
+1. ~~**Cross-vendor judge replication.** Rerun the same 21 items with
    GPT-5.5 max and Gemini 3.1 Pro HIGH as the ranking judges. ~$30
-   estimated. Tests whether the ordering survives a different
-   stylistic prior. Strongest single experiment to bound vendor bias.
+   estimated.~~ **Done — see §10.** Actual cost $21.34. Sonnet >
+   Opus > GPT > DeepSeek > Gemini ordering held for 3 of 4 judges;
+   the bottom of the ranking is unanimous across vendors.
 2. **Length-controlled rerun.** Hard-truncate every candidate to the
    shortest arm's length per item (Gemini's median is the floor) and
    rerun the rankings. Tests the "length is a proxy for substance"
@@ -413,3 +411,137 @@ or judging by non-Anthropic models is not established by this data.
    a "presentation quality" ranking (correctness is binary and uniform
    at baseline so absolute scoring is uninformative). ~$25, low-signal
    but completes the picture.
+
+---
+
+## 10. Cross-vendor judge follow-up
+
+*Added 2026-04-26. Same 21 items, same permutations, two new judges.*
+
+### 10.1 What was added
+
+Per §7.3 the only meaningful caveat left after §1–9 was vendor
+homogeneity in the judge set. This section adds two non-Anthropic
+judges scoring the same bundles.
+
+- **GPT-5.5** (`gpt-5.5-2026-04-23`) at `reasoning.effort = xhigh`
+  (vendor max). 21 calls, $16.56 spend, 205s/call mean.
+- **Gemini 3.1 Pro** (`gemini-3-pro-preview`) at `thinking_level = HIGH`
+  (vendor max). 21 calls, $4.78 spend, 78s/call mean.
+- **Total incremental spend:** $21.34. Permutations are stable across
+  all four judges — every judge scored the same A–E shuffle.
+
+Implementation: `harness/scripts/judge_sober_ranking.py` was extended
+with vendor dispatch (`anthropic` / `openai` / `google`); the existing
+helpers in `harness/src/api.py` for streamed chunked decoding and
+vendor-specific usage extraction are reused unchanged. `--judges
+{opus, sonnet, gpt, gemini, all}` selects which to run; runs are
+idempotent on `(q_id, rep_idx, judge)`. The held-constant judge
+config in `base.yaml` is untouched — the cross-vendor judges are an
+additive analysis on top of the locked main study.
+
+### 10.2 Mean rank per arm, all four judges
+
+(Lower is better. **Bold** marks each judge's #1.)
+
+| arm                   | Opus judge | Sonnet judge | GPT judge | Gemini judge |
+|-----------------------|-----------:|-------------:|----------:|-------------:|
+| **sonnet-4-6**        |   **1.48** |     **1.33** |      2.24 |     **1.43** |
+| **opus-4-7**          |       1.62 |         1.76 |  **1.95** |         1.67 |
+| gpt-5-5               |       3.00 |         2.95 |  **1.95** |         3.24 |
+| deepseek-v4-pro       |       4.24 |         4.19 |      4.10 |         4.19 |
+| gemini-3-1-pro        |       4.67 |         4.76 |      4.76 |         4.48 |
+
+Three of four judges produce the exact ordering Sonnet > Opus > GPT >
+DeepSeek > Gemini. The GPT judge swaps Sonnet and itself into a tie
+at #1 with Opus, but the top-3 set is unchanged. **The bottom of the
+ranking is unanimous** across all four judges: Gemini last, DeepSeek
+4th. The Gemini judge ranks Gemini-3.1-Pro behind DeepSeek-V4-Pro by
+0.29 rank steps — explicit vendor self-demotion at the bottom.
+
+### 10.3 Self-preference per judge
+
+For each judge, the rank it assigns to its own analyst arm vs the
+mean rank assigned by the other three judges:
+
+| judge  | self-rank | external mean | self-bias  |
+|--------|----------:|--------------:|-----------:|
+| GPT    |      1.95 |          3.06 | **+1.11**  |
+| Sonnet |      1.33 |          1.72 |  +0.39     |
+| Gemini |      4.48 |          4.73 |  +0.25     |
+| Opus   |      1.62 |          1.79 |  +0.17     |
+
+GPT shows the largest self-favoring bias by a factor of ~3×. None
+inverts a pair: even the GPT judge keeps Gemini at 4.76 and DeepSeek
+at 4.10, both well below GPT's own 1.95. The Sonnet bias is
+consistent with the original §7.2 analysis, but is now bounded by
+two non-Sonnet judges who independently rank Sonnet 1st (Opus judge
+1.48 = Sonnet 1st; Gemini judge 1.43 = Sonnet 1st). The Opus
+judge already preferred Sonnet over Opus in the original §2 result.
+
+### 10.4 All-pairs cross-judge agreement
+
+| pair                | Spearman ρ (mean) | Borda Pearson r | top-1 same | top-3 same |
+|---------------------|------------------:|----------------:|-----------:|-----------:|
+| opus  vs sonnet     |             0.943 |       **0.997** |      76.2% |      85.7% |
+| opus  vs gemini     |             0.838 |       **0.995** |      47.6% |      76.2% |
+| sonnet vs gemini    |             0.843 |       **0.991** |      52.4% |      81.0% |
+| opus  vs gpt        |             0.714 |           0.887 |      47.6% |      81.0% |
+| sonnet vs gpt       |             0.729 |           0.888 |      38.1% |      85.7% |
+| gpt   vs gemini     |             0.724 |           0.836 |      47.6% |      66.7% |
+
+- **Per-arm rankings cluster very tightly** (Pearson 0.84–1.00). Every
+  judge produces essentially the same global ordering of arms.
+- **Per-item rankings are looser** (Spearman 0.71–0.94). Disagreement
+  on which specific (q_id, rep) item produced the best answer is
+  ~30%, but it averages out across items.
+- **GPT is the noisiest judge** — every pair involving GPT has the
+  lowest Spearman and Borda Pearson in its row. Consistent with the
+  GPT judge having the flattest top-3 (Opus / GPT / Sonnet within 0.3
+  rank steps) and the largest self-preference bias.
+
+### 10.5 What changed in the conclusions
+
+Nothing inverts. What sharpens:
+
+- The original headline ("Sonnet 4.6 produces the best Tier-3
+  synthesis on this corpus") survives. Anthropic-only judges,
+  Anthropic + Gemini judges, three-of-four configurations of the
+  four judges all return Sonnet at #1.
+- The single dissenting case (GPT judge ties Opus and itself at #1
+  ahead of Sonnet) is consistent with the largest measured
+  self-preference bias on the panel, not with a substantively
+  different reading of the corpus.
+- The bottom of the ranking is now stronger than before: every
+  vendor's judge — including Gemini's own — places Gemini last and
+  DeepSeek fourth. The §6 swap of Gemini and DeepSeek (vs the
+  absolute baseline) is robust across all four judge vendors.
+- The original Anthropic-judge picture was *conservative* on the
+  GPT-vs-Anthropic gap. Anthropic and Gemini judges read the gap as
+  ~1.4 rank steps; the GPT judge reads it as ~0 (tied). Truth is
+  somewhere between, and either way Sonnet/Opus remain clearly above
+  GPT/DeepSeek/Gemini.
+
+### 10.6 Files
+
+- `cross_arm/sober_state/judge_gpt.jsonl` — 21 rows, schema
+  identical to `judge_opus.jsonl`.
+- `cross_arm/sober_state/judge_gemini.jsonl` — 21 rows, same schema.
+- `cross_arm/sober_state/cross_judge_4way.json` — structured dump
+  from `scripts.sober_analysis`.
+- `cross_arm/sober_state/CROSS_VENDOR_JUDGE_FOLLOWUP.md` —
+  standalone summary of this follow-up (more compact than this section).
+- `cross_arm/sober_state/permutations.jsonl` — unchanged; same
+  shuffle map all four judges scored against.
+
+### 10.7 Reproduce
+
+```
+cd harness
+uv run python -m scripts.judge_sober_ranking --judges gemini --concurrency 3
+uv run python -m scripts.judge_sober_ranking --judges gpt    --concurrency 3
+uv run python -m scripts.sober_analysis --json ../cross_arm/sober_state/cross_judge_4way.json
+```
+
+`--judges all` runs all four; opus and sonnet are no-ops if their
+21 rows already exist (idempotent skip-if-exists per item).

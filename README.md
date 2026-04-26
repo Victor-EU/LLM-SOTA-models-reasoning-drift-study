@@ -42,10 +42,18 @@ Headline ordering under both Anthropic judges:
 **Sonnet 4.6 > Opus 4.7 > GPT-5.5 > DeepSeek V4 Pro > Gemini 3.1 Pro**
 (cross-judge per-item Spearman ρ = 0.943). The top is *flipped* from the
 absolute-judge baseline (which had Opus 1st at RQ 8.05, Sonnet 2nd at 7.43).
-Reports: [`cross_arm/SOBER_STATE_FINAL_REPORT.md`](cross_arm/SOBER_STATE_FINAL_REPORT.md)
-(reader-facing) and
+A **cross-vendor judge follow-up** (GPT-5.5 xhigh + Gemini 3.1 Pro HIGH on
+the same 21 items, same permutations) confirmed the ordering for 3 of 4
+judges and produced unanimous agreement on the bottom — Gemini last,
+DeepSeek 4th, including under the Gemini judge itself. Reports:
+[`cross_arm/SOBER_STATE_FINAL_REPORT.md`](cross_arm/SOBER_STATE_FINAL_REPORT.md)
+(reader-facing),
 [`cross_arm/SOBER_STATE_RANKING.md`](cross_arm/SOBER_STATE_RANKING.md)
-(technical). Incremental spend: **$34.40** (1.8% of the main study). See
+(technical, with §10 covering the cross-vendor follow-up), and
+[`cross_arm/sober_state/CROSS_VENDOR_JUDGE_FOLLOWUP.md`](cross_arm/sober_state/CROSS_VENDOR_JUDGE_FOLLOWUP.md)
+(standalone follow-up summary). Incremental spend: **$55.74** (3.0% of the
+main study; $34.40 original Anthropic judges + $21.34 cross-vendor
+follow-up). See
 [The sober-state ranking](#the-sober-state-ranking--third-experiment) below.
 
 Haiku 4.5 was considered but excluded — its 200K context window and
@@ -85,6 +93,10 @@ current pricing before kicking off a new arm.)
 │   ├── SOBER_STATE_FINAL_REPORT.md  # 3rd experiment: sober-state ranking, reader-facing
 │   ├── SOBER_STATE_RANKING.md       # 3rd experiment: sober-state ranking, technical writeup
 │   └── sober_state/                 # raw judge outputs + per-item {label → arm} permutations
+│       ├── judge_{opus,sonnet,gpt,gemini}.jsonl  # one row per (q_id, rep_idx, judge)
+│       ├── permutations.jsonl                    # stable across all 4 judges
+│       ├── cross_judge_4way.json                 # structured 4-way agreement dump
+│       └── CROSS_VENDOR_JUDGE_FOLLOWUP.md        # standalone cross-vendor summary
 ├── QUALITATIVE_FINDINGS.md          # qualitative observations across arms
 └── harness/
     ├── config/
@@ -199,10 +211,19 @@ inherited: same materials hash, same methodology hash, same per-arm
 `fill=0` data files, same judge snapshots, same temperatures, same
 thinking efforts.
 
-The largest remaining caveat is that both judges are Anthropic-family. A
-cross-vendor judge replication (~$30 estimated, GPT-5.5 max + Gemini 3.1
-Pro HIGH as ranking judges) is enumerated as the highest-value follow-up
-in `SOBER_STATE_FINAL_REPORT.md §4.4`.
+The largest remaining caveat at first writing — that both judges were
+Anthropic-family — was closed by a cross-vendor follow-up that added
+GPT-5.5 (xhigh) and Gemini 3.1 Pro (HIGH) as judges on the same 21
+items, same permutations, $21.34 incremental spend. Three of four
+judges (Opus, Sonnet, Gemini) returned the exact ordering above; the
+GPT judge swapped Sonnet and itself to a tie at #1 with Opus but the
+top-3 set was unchanged. The bottom is unanimous: Gemini last on every
+judge, including the Gemini judge itself (which puts Gemini behind
+DeepSeek). Self-preference is bounded — GPT +1.11 rank steps in-house
+(largest), Sonnet +0.39, Gemini +0.25, Opus +0.17 — and none invert
+any pair. Per-arm Pearson r between judges ranges 0.84 – 1.00. Full
+breakdown: `SOBER_STATE_RANKING.md §10` and the standalone
+`cross_arm/sober_state/CROSS_VENDOR_JUDGE_FOLLOWUP.md`.
 
 ## Reproducing an arm
 
@@ -260,7 +281,9 @@ locked arms span a 3× cost range ($194 → $582) at constant 91 runs,
 constant judges, and constant materials — the spread reflects vendor
 pricing + per-vendor reasoning-token allocation differences only.
 
-The third experiment (sober-state ranking) added **$34.40 incremental
-spend** — 1.8% of the main study, executed against the same baseline
-data files without re-running any analyst. Project-wide total:
-**$1,894.06**.
+The third experiment (sober-state ranking) added **$55.74 incremental
+spend** — 3.0% of the main study, executed against the same baseline
+data files without re-running any analyst. Of that, $34.40 paid for
+the original two Anthropic judges and $21.34 paid for the cross-vendor
+follow-up (GPT-5.5 xhigh + Gemini 3.1 Pro HIGH on the same 21 items).
+Project-wide total: **$1,915.40**.

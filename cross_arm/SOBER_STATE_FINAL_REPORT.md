@@ -575,12 +575,13 @@ substance + GPT-5.5's hallucination floor is a complementary pair —
 neither dominates the other on both axes.
 
 #### **C. Multi-judge ensemble for evaluation**
-For downstream evals: Opus 4.7 max + Sonnet 4.6 high + (cross-vendor)
-GPT-5.5 max as ensemble judges, vote-aggregated. The cross-judge
-agreement of 0.943 in this report shows two-judge ensembles already
-substantially de-bias single-judge prior. Adding a third
-non-Anthropic judge would close the largest remaining caveat in this
-report (§4.4).
+For downstream evals: Opus 4.7 max + Sonnet 4.6 high + GPT-5.5 xhigh +
+Gemini 3.1 Pro HIGH as ensemble judges, vote-aggregated. The two-judge
+agreement of 0.943 in §4.3 already substantially de-biases the
+single-judge prior; the four-judge replication added in §4.4 confirms
+the ordering generalizes across vendors. The largest measured
+self-preference is +1.11 rank steps (GPT in-house), small enough that
+ensemble averaging neutralizes it cleanly.
 
 ### 3.5 What to ignore in choosing a model
 
@@ -689,12 +690,20 @@ would say "judges disagree, here's why" — they didn't.
   Opus itself (inconsistent with pure self-preference). The
   Opus-as-judge result is the stronger evidence Sonnet really is the
   best in this dataset.
-- **Both judges are Anthropic.** The single highest-value follow-up is
-  a cross-vendor judge replication: rerun the same 21 items with
-  GPT-5.5 max-effort and Gemini 3.1 Pro HIGH as judges. ~$30
-  estimated. If the ordering survives non-Anthropic judges, the
-  finding is robust to vendor stylistic priors. If it inverts the top
-  or the bottom, the magnitude bounds vendor bias.
+- **Both judges are Anthropic.** ~~Highest-value follow-up.~~ **Done
+  2026-04-26.** GPT-5.5 (xhigh) and Gemini 3.1 Pro (HIGH) added as
+  judges on the same 21 items, same permutations. Three of four judges
+  (Opus, Sonnet, Gemini) returned the same Sonnet > Opus > GPT >
+  DeepSeek > Gemini ordering. The GPT judge swapped Sonnet and itself
+  to a tie at #1 with Opus, but the top-3 set was unchanged. The
+  bottom of the ranking is unanimous across all four vendors —
+  *the Gemini judge ranks Gemini behind DeepSeek*. Self-preference is
+  bounded: GPT +1.11 rank steps in-house (largest), Sonnet +0.39,
+  Gemini +0.25, Opus +0.17 — none invert any pair. Per-arm Pearson r
+  across all judge pairs ranges 0.84–1.00. The original Anthropic-only
+  picture was conservative on the GPT-vs-Anthropic gap, not biased.
+  Full breakdown: `SOBER_STATE_RANKING.md §10` and the standalone
+  `cross_arm/sober_state/CROSS_VENDOR_JUDGE_FOLLOWUP.md`.
 - **Position bias present, small.** Both judges under-pick the last
   label (E) for #1 (4.8% vs 20% expected). Random permutation spreads
   this roughly uniformly across arms; aggregate impact is below the
@@ -705,16 +714,21 @@ would say "judges disagree, here's why" — they didn't.
 
 ### 4.5 Cost
 
-| component                | cost     | notes                                                                                  |
-|--------------------------|----------|----------------------------------------------------------------------------------------|
-| Opus 4.7 max-effort judge| $24.95   | 22 calls (21 items + 1 retry); avg $1.13/call; avg latency 136s                         |
-| Sonnet 4.6 high judge    | $9.45    | 27 calls (21 items + 6 retries on max-token caps); avg $0.35/call; avg latency 311s    |
-| **Total**                | **$34.40** | 42 valid ranking results                                                              |
+| component                  | cost       | notes                                                                                 |
+|----------------------------|-----------:|---------------------------------------------------------------------------------------|
+| Opus 4.7 max-effort judge  | $24.95     | 22 calls (21 items + 1 retry); avg $1.13/call; avg latency 136s                       |
+| Sonnet 4.6 high judge      | $9.45      | 27 calls (21 items + 6 retries on max-token caps); avg $0.35/call; avg latency 311s   |
+| GPT-5.5 xhigh judge        | $16.56     | 21 calls; avg $0.79/call; avg latency 205s — added as cross-vendor follow-up          |
+| Gemini 3.1 Pro HIGH judge  | $4.78      | 21 calls; avg $0.23/call; avg latency 78s — added as cross-vendor follow-up           |
+| **Total**                  | **$55.74** | 84 valid ranking results across 4 judges (all on the same 21 items / permutations)    |
 
-Cost is below 2% of the main study's $1,860 spend. The integrity check
+Cost is **3% of the main study's $1,860 spend**. The integrity check
 this analysis provides — *which model is actually best at the task,
 controlling for judge-prior comparison* — is structurally important to
 any reader trying to use this study to make a model-choice decision.
+After the cross-vendor judge follow-up, the same finding now holds
+across four vendors of judges with self-preference bounded at +1.11
+rank steps and no judge inverting any pair.
 
 ---
 

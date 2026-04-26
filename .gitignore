@@ -30,3 +30,8 @@ venv/
 .vscode/
 .idea/
 *.swp
+
+# Transient judge re-run artifacts (kept locally for diff'ing successive runs;
+# never the locked artifact). Prior runs left *.jsonl.bak / *.jsonl.bak2.
+*.bak
+*.bak[0-9]*

@@ -20,17 +20,15 @@ level, and `compare_arms.py` refuses to produce cross-arm output unless
 every arm declares the same methodology hash, materials hash, design grid,
 and extractor + judge configuration.
 
-| Arm                                   | Vendor    | Max-thinking knob              | Lock | Spend    | Notes                                                                                                  |
-| ------------------------------------- | --------- | ------------------------------ | ---- | -------- | ------------------------------------------------------------------------------------------------------ |
-| **Opus 4.7** (max effort)             | Anthropic | `effort=max`                   | v1   | $582.33  | 91/91/91 runs. Original lock arm. Monotonic decline; unsupported-claim hallucinations 7× under load.   |
-| **Sonnet 4.6** (max effort)           | Anthropic | `effort=max`                   | v1   | $522.96  | 91/91/91 runs. Drift profile *differs* from Opus — quality recovers at 95% fill. 5–10× longer latency. |
-| **GPT-5.5** (xhigh)                   | OpenAI    | `reasoning.effort=xhigh`       | v2   | $338.83  | 91/91/91 runs. Flat-then-cliff at 92%. Hallucination floor across all fills (unsup ≈ 0).               |
-| **Gemini 3.1 Pro** (HIGH)             | Google    | `thinking_level=HIGH`          | v2   | $221.00  | 91/91/91 runs. Flattest absolute drift, lowest baseline ceiling. 3–15× speed advantage.                |
-| **DeepSeek V4 Pro** (max)             | DeepSeek  | `reasoning_effort=max`         | v2   | $194.54  | 91/91/91 runs. Absolute-vs-pairwise paradox: flat absolute, steepest pairwise. Highest cross-judge CCC.|
+| Arm                                   | Vendor    | Max-thinking knob              | Lock | Notes                                                                                                  |
+| ------------------------------------- | --------- | ------------------------------ | ---- | ------------------------------------------------------------------------------------------------------ |
+| **Opus 4.7** (max effort)             | Anthropic | `effort=max`                   | v1   | 91/91/91 runs. Original lock arm. Monotonic decline; unsupported-claim hallucinations 7× under load.   |
+| **Sonnet 4.6** (max effort)           | Anthropic | `effort=max`                   | v1   | 91/91/91 runs. Drift profile *differs* from Opus — quality recovers at 95% fill. 5–10× longer latency. |
+| **GPT-5.5** (xhigh)                   | OpenAI    | `reasoning.effort=xhigh`       | v2   | 91/91/91 runs. Flat-then-cliff at 92%. Hallucination floor across all fills (unsup ≈ 0).               |
+| **Gemini 3.1 Pro** (HIGH)             | Google    | `thinking_level=HIGH`          | v2   | 91/91/91 runs. Flattest absolute drift, lowest baseline ceiling. 3–15× speed advantage.                |
+| **DeepSeek V4 Pro** (max)             | DeepSeek  | `reasoning_effort=max`         | v2   | 91/91/91 runs. Absolute-vs-pairwise paradox: flat absolute, steepest pairwise. Highest cross-judge CCC.|
 
-Total spend across the five arms: **$1,859.66** (Opus + Sonnet + judge spend
-shared at v1; three new analyst arms added at v2). The cross-arm
-interpretive synthesis lives at
+The cross-arm interpretive synthesis lives at
 [`cross_arm/CROSS_ARM_REPORT.md`](cross_arm/CROSS_ARM_REPORT.md); the
 auto-generated table-only comparison at
 [`cross_arm/COMPARATIVE_REPORT.md`](cross_arm/COMPARATIVE_REPORT.md).
@@ -51,20 +49,12 @@ DeepSeek 4th, including under the Gemini judge itself. Reports:
 [`cross_arm/SOBER_STATE_RANKING.md`](cross_arm/SOBER_STATE_RANKING.md)
 (technical, with §10 covering the cross-vendor follow-up), and
 [`cross_arm/sober_state/CROSS_VENDOR_JUDGE_FOLLOWUP.md`](cross_arm/sober_state/CROSS_VENDOR_JUDGE_FOLLOWUP.md)
-(standalone follow-up summary). Incremental spend: **$55.74** (3.0% of the
-main study; $34.40 original Anthropic judges + $21.34 cross-vendor
-follow-up). See
+(standalone follow-up summary). See
 [The sober-state ranking](#the-sober-state-ranking--third-experiment) below.
 
 Haiku 4.5 was considered but excluded — its 200K context window and
 unverified `effort=max` thinking support would force two confounded changes
 at once. See `ARMS.md` for the full rationale.
-
-(Estimate: the judge spend (~$246) is shared across arms since the judge is
-held constant at Opus 4.7 max-effort. Analyst-side spend varies with the
-vendor's pricing and reasoning-token allocation. Run
-`python -m scripts.dry_run --arm <arm>` for a fresh estimate against
-current pricing before kicking off a new arm.)
 
 ## Layout
 
@@ -158,7 +148,7 @@ mapping, tokenizer asymmetry, and the judge-bias acceptance argument, see
 The drift study answers *which arm degrades least under noise.* The
 sober-state ranking, layered on the same dataset, answers a complementary
 question the drift study can't: *with no noise at all, which arm produces
-the best Tier-3 synthesis?* It is a separate analysis with separate spend,
+the best Tier-3 synthesis?* It is layered on top of the existing dataset,
 not a re-run of any arm — every analyst response was already collected
 during the main study's `fill=0` baseline cell.
 
@@ -195,8 +185,7 @@ paradox (`CROSS_ARM_REPORT.md §4`), reapplied to the no-noise condition:
 side-by-side comparison and isolated Likert scoring answer different
 questions about quality, and the ordering depends on which one you use.
 
-Incremental spend: **$34.40** (1.8% of the main study) — 22 Opus
-judgements + 27 Sonnet judgements over 21 items. Reproduce with:
+Reproduce with:
 
 ```
 python -m scripts.judge_sober_ranking    # 21 items × 2 judges
@@ -214,16 +203,15 @@ thinking efforts.
 The largest remaining caveat at first writing — that both judges were
 Anthropic-family — was closed by a cross-vendor follow-up that added
 GPT-5.5 (xhigh) and Gemini 3.1 Pro (HIGH) as judges on the same 21
-items, same permutations, $21.34 incremental spend. Three of four
-judges (Opus, Sonnet, Gemini) returned the exact ordering above; the
-GPT judge alone moved itself from #3 to a tie at #1 with Opus,
-displacing Sonnet to #3 — but the top-3 set was unchanged. The bottom
-is unanimous: Gemini last on every judge, including the Gemini judge
-itself (which puts Gemini behind DeepSeek). Self-preference is
-bounded — GPT +1.11 rank steps in-house (largest), Sonnet +0.38,
-Gemini +0.25, Opus +0.17 — and none invert any pair. Per-arm Pearson r
-between judges ranges 0.84 – 1.00. Full breakdown:
-`SOBER_STATE_RANKING.md §10` and the standalone
+items, same permutations. Three of four judges (Opus, Sonnet, Gemini)
+returned the exact ordering above; the GPT judge alone moved itself
+from #3 to a tie at #1 with Opus, displacing Sonnet to #3 — but the
+top-3 set was unchanged. The bottom is unanimous: Gemini last on every
+judge, including the Gemini judge itself (which puts Gemini behind
+DeepSeek). Self-preference is bounded — GPT +1.11 rank steps in-house
+(largest), Sonnet +0.38, Gemini +0.25, Opus +0.17 — and none invert
+any pair. Per-arm Pearson r between judges ranges 0.84 – 1.00. Full
+breakdown: `SOBER_STATE_RANKING.md §10` and the standalone
 `cross_arm/sober_state/CROSS_VENDOR_JUDGE_FOLLOWUP.md`.
 
 ## Reproducing an arm
@@ -267,24 +255,3 @@ python -m scripts.verify_arm_integrity --arm <arm>
 python -m scripts.compare_arms --write-report
 ```
 
-## Spend and budget
-
-Per-arm budget guards live in `harness/config/base.yaml`:
-
-```
-budget_usd:    $700   (warning threshold)
-hard_stop_usd: $850   (CostTracker aborts)
-```
-
-Pricing is snapshotted into each `arm.lock.json` so cost can be honestly
-reconstructed even if API rates change after an arm closes. The five
-locked arms span a 3× cost range ($194 → $582) at constant 91 runs,
-constant judges, and constant materials — the spread reflects vendor
-pricing + per-vendor reasoning-token allocation differences only.
-
-The third experiment (sober-state ranking) added **$55.74 incremental
-spend** — 3.0% of the main study, executed against the same baseline
-data files without re-running any analyst. Of that, $34.40 paid for
-the original two Anthropic judges and $21.34 paid for the cross-vendor
-follow-up (GPT-5.5 xhigh + Gemini 3.1 Pro HIGH on the same 21 items).
-Project-wide total: **$1,915.40**.

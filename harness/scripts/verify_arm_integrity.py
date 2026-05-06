@@ -179,13 +179,15 @@ def verify_analyst_in_raw_records(arm_dir: Path, *, quiet: bool) -> int:
 def _load_accepted_methodology_hashes() -> dict[str, str]:
     """Return {hash → version_label} for every project lock file present.
 
-    Both pre_registration.lock (v1) and pre_registration.v2.lock (v2) are
-    accepted. v1 arms remain valid evidence under v2 by inheritance —
-    see MULTI_VENDOR_ADDENDUM.md §1.
+    All of pre_registration.lock (v1), pre_registration.v2.lock (v2), and
+    pre_registration.v3.lock (v3) are accepted — v1 arms remain valid
+    evidence under v2/v3 by inheritance. See MULTI_VENDOR_ADDENDUM.md §1
+    and TEMPORAL_NOISE_ADDENDUM.md §10.
     """
     out: dict[str, str] = {}
     for fname, label in [("pre_registration.lock", "v1"),
-                         ("pre_registration.v2.lock", "v2")]:
+                         ("pre_registration.v2.lock", "v2"),
+                         ("pre_registration.v3.lock", "v3")]:
         p = PROJECT_ROOT / fname
         if p.exists():
             h = json.loads(p.read_text(encoding="utf-8")).get("methodology_hash")

@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_10q_fy2024_q2",
+  "noise_type": "temporal_msft",
+  "subpool": "10q",
+  "title": "Microsoft Corporation Form 10-Q Q2 FY2024",
+  "period_label": "Q2 FY2024",
+  "fiscal_year": 2024,
+  "fiscal_quarter": 2,
+  "sha256": "051e5e7124ff1170b68d3555521c9bf47e0089971a1d4e4440dbfa972d80781d",
+  "token_count": 53241,
+  "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000095017024008814/msft-20231231.htm",
+  "pair_target": "MSFT"
+}

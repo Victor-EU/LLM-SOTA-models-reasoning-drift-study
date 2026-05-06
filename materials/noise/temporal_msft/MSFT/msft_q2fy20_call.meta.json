@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q2fy20_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q2 FY2020 Earnings Call Transcript",
+  "period_label": "Q2 FY2020 earnings call",
+  "fiscal_year": 2020,
+  "fiscal_quarter": 2,
+  "sha256": "32e74c35c783e86d2db24dc4f605b2930d447c2e342bf844c9702ff681bbcf64",
+  "token_count": 13815,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://www.fool.com/earnings/call-transcripts/2020/01/30/microsoft-corp-msft-q2-2020-earnings-call-transcri.aspx\n# snapshot: https://web.archive.org/web/20200201000000id_/https://www.fool.com/earnings/call-transcripts/2020/01/30/microsoft-corp-msft-q2-2020-earnings-call-transcri.aspx",
+  "pair_target": "MSFT"
+}

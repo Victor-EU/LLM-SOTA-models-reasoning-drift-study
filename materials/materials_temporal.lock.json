@@ -1,0 +1,160 @@
+{
+  "files": {
+    "ground_truth/MSFT_temporal_distractors.json": {
+      "sha256": "4811eefef8749a989357a931190c71b6ae745cf63b4e893bbeee734215aadee2",
+      "bytes": 7496,
+      "kind": "temporal_distractor_list",
+      "added_in": "v0.2"
+    },
+    "noise/temporal_msft/MSFT/msft_10k_fy2023.txt": {
+      "sha256": "199e7ed591437e632cc882f29aaaf83b76cd09e49c06fe507ca82bddb2e26da5",
+      "token_count": 85516
+    },
+    "noise/temporal_msft/MSFT/msft_10k_fy2024.txt": {
+      "sha256": "a48c3961d848874613c59606e96475f600fa8421ba1a91a1e91d749a3fb824e4",
+      "token_count": 89853
+    },
+    "noise/temporal_msft/MSFT/msft_10q_fy2023_q1.txt": {
+      "sha256": "b189c035b665b7b55fa1ae9cd19b81dfd083538af03a9dc05711d95ee90ff1df",
+      "token_count": 48729
+    },
+    "noise/temporal_msft/MSFT/msft_10q_fy2023_q2.txt": {
+      "sha256": "0ea39ab30ee2c45bd187852182521cefe19ef756bf1d9822b36fc4d68ebe3297",
+      "token_count": 53700
+    },
+    "noise/temporal_msft/MSFT/msft_10q_fy2023_q3.txt": {
+      "sha256": "56f3bed277b4ca7aaa031a7d96f5d41b6c509a8b058e496bd20ebb241b0849a0",
+      "token_count": 53544
+    },
+    "noise/temporal_msft/MSFT/msft_10q_fy2024_q1.txt": {
+      "sha256": "0de8425f0ebf8ed67ed65d7d3d0755f79818ae1193a36b036faca1838c4f9a04",
+      "token_count": 46338
+    },
+    "noise/temporal_msft/MSFT/msft_10q_fy2024_q2.txt": {
+      "sha256": "051e5e7124ff1170b68d3555521c9bf47e0089971a1d4e4440dbfa972d80781d",
+      "token_count": 53241
+    },
+    "noise/temporal_msft/MSFT/msft_10q_fy2024_q3.txt": {
+      "sha256": "570367d8c9f44b4a25a849bf9e597522fb4ce033809e0462dde711f6705529ab",
+      "token_count": 53247
+    },
+    "noise/temporal_msft/MSFT/msft_10q_fy2025_q1.txt": {
+      "sha256": "2cc4bbdb52e3c049f2237db254e3e66aa2756df6401aef16afa680fd38765017",
+      "token_count": 49517
+    },
+    "noise/temporal_msft/MSFT/msft_10q_fy2025_q2.txt": {
+      "sha256": "402e0e6c101b1074456287a1c54112301c1cb5d69e85dcf31066de6d05bee816",
+      "token_count": 52453
+    },
+    "noise/temporal_msft/MSFT/msft_10q_fy2025_q3.txt": {
+      "sha256": "4b2041b439ac37082d5847497638d5d78e8d03ba6762194467d2d7850666bca7",
+      "token_count": 53058
+    },
+    "noise/temporal_msft/MSFT/msft_q1fy21_call.txt": {
+      "sha256": "f109104c13dfe21a7448fa2338267209d2e30e5190ad0abfb2a42bff71294753",
+      "token_count": 14826
+    },
+    "noise/temporal_msft/MSFT/msft_q1fy22_call.txt": {
+      "sha256": "07b82b6ac73a35235cd4c926ae3fe08fc19398c10704503f6fef161af9733efd",
+      "token_count": 14259
+    },
+    "noise/temporal_msft/MSFT/msft_q1fy23_call.txt": {
+      "sha256": "02d38281fdfe11c535ea22fb8d6becabe5288e0babb91b02d876866a822b83b8",
+      "token_count": 15433
+    },
+    "noise/temporal_msft/MSFT/msft_q1fy24_call.txt": {
+      "sha256": "e7ad943f3c005ce3660d688a8bed20bd0f8e0e56291e9ccfb65429bcffe4f61d",
+      "token_count": 14782
+    },
+    "noise/temporal_msft/MSFT/msft_q1fy26_call.txt": {
+      "sha256": "6ad21a6f5009e3a0c8b6541a5f46165ee7cf01edd295eed680321c4cc8e2b1fe",
+      "token_count": 14756
+    },
+    "noise/temporal_msft/MSFT/msft_q2fy18_call.txt": {
+      "sha256": "25c2ff5908c865de9d341a2d1fd8b298ea496846ffc67ff89297643b0398eed9",
+      "token_count": 16547
+    },
+    "noise/temporal_msft/MSFT/msft_q2fy19_call.txt": {
+      "sha256": "90e375ab4f3e42879c8a5837c6465decdb11177334f524f8f1dc1b014845bfca",
+      "token_count": 15666
+    },
+    "noise/temporal_msft/MSFT/msft_q2fy20_call.txt": {
+      "sha256": "32e74c35c783e86d2db24dc4f605b2930d447c2e342bf844c9702ff681bbcf64",
+      "token_count": 13815
+    },
+    "noise/temporal_msft/MSFT/msft_q2fy21_call.txt": {
+      "sha256": "d75121648023190834c2c348b1b72a63fcd66a5929594c7c9fc0abd93f8187ab",
+      "token_count": 13214
+    },
+    "noise/temporal_msft/MSFT/msft_q2fy22_call.txt": {
+      "sha256": "8a2e6417478dc0e95d438549f871fad2079ac3b4e62963daadd5aa7631875411",
+      "token_count": 16196
+    },
+    "noise/temporal_msft/MSFT/msft_q2fy23_call.txt": {
+      "sha256": "f26955d2e76fdfe1661a06a9a487460d8b0764787b7614ca97b0cc058ef308ed",
+      "token_count": 16370
+    },
+    "noise/temporal_msft/MSFT/msft_q2fy24_call.txt": {
+      "sha256": "991403f518820461106145cf9ba610928711dde1ca06a306990e340106cf7a30",
+      "token_count": 17309
+    },
+    "noise/temporal_msft/MSFT/msft_q2fy25_call.txt": {
+      "sha256": "a26bfc5913963a2ba9fb19eaac094396b5cfe7e8b54ee0268f0b3fa8c0fc362b",
+      "token_count": 16358
+    },
+    "noise/temporal_msft/MSFT/msft_q3fy18_call.txt": {
+      "sha256": "b1ecd7d02691707adaa54cdde4b15e5fd1556169c85dc19a89301f0d35405e32",
+      "token_count": 17640
+    },
+    "noise/temporal_msft/MSFT/msft_q3fy20_call.txt": {
+      "sha256": "6b31ffaab63e86584323bd9d1ee03ee0a1657c57061262139029424647cf2cd8",
+      "token_count": 15630
+    },
+    "noise/temporal_msft/MSFT/msft_q3fy21_call.txt": {
+      "sha256": "5ddff19001db6e9a99a2ec9d0ac0adc7f868338c7c65b9e31688f1c6ae107ef7",
+      "token_count": 14844
+    },
+    "noise/temporal_msft/MSFT/msft_q3fy22_call.txt": {
+      "sha256": "8ee3e7fce8ac4f6a319315a286eca21f1cf06e6d15ae39740d267cc71748dbab",
+      "token_count": 15577
+    },
+    "noise/temporal_msft/MSFT/msft_q3fy23_call.txt": {
+      "sha256": "cf49861f2727e279c1fb7f80487f27044948b9ac30a2a3299f26dce6ed396743",
+      "token_count": 14531
+    },
+    "noise/temporal_msft/MSFT/msft_q3fy24_call.txt": {
+      "sha256": "7a5124665afb395fb1f99851fbcd286ed077293ca775ae1d091b916b1d3c12ad",
+      "token_count": 17127
+    },
+    "noise/temporal_msft/MSFT/msft_q4fy20_call.txt": {
+      "sha256": "9e46666547d8222649692627a851e23c18da77a752f5c4a1350161e8e82a278d",
+      "token_count": 13929
+    },
+    "noise/temporal_msft/MSFT/msft_q4fy21_call.txt": {
+      "sha256": "4c88d6ea7f7ac6c524dcbb2f4852d920360bec8670cacdc5b3fa8a6421b26117",
+      "token_count": 14466
+    },
+    "noise/temporal_msft/MSFT/msft_q4fy22_call.txt": {
+      "sha256": "862f38df65d539477cfbc55b73ef91a31ff3954b419c10c848bf9e6e9482da40",
+      "token_count": 14713
+    },
+    "noise/temporal_msft/MSFT/msft_q4fy25_call.txt": {
+      "sha256": "7fc0a310e787857b4c289aefa1521b8e4cfa54c9e07cd83d047b32ff39cae110",
+      "token_count": 14196
+    },
+    "noise_screening_log.md": {
+      "sha256": "00987999f67b01030e6ba22618e0753f88e234d3120a27eab83bc93b23f3f553",
+      "bytes": 12269,
+      "kind": "noise_screening_log",
+      "added_in": "v0.2"
+    },
+    "target/MSFT/10k.txt": {
+      "sha256": "681266fb085945f8b2d42b9349ca9350d67df06f8cc5fcdd48b786f5cb686263",
+      "token_count": 79518
+    },
+    "target/MSFT/earnings_call.txt": {
+      "sha256": "f48deb2c1899174b36428db13d6f615833980ed785ad4239520b810c06378eb5",
+      "token_count": 15314
+    }
+  }
+}

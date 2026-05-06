@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q2fy19_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q2 FY2019 Earnings Call Transcript",
+  "period_label": "Q2 FY2019 earnings call",
+  "fiscal_year": 2019,
+  "fiscal_quarter": 2,
+  "sha256": "90e375ab4f3e42879c8a5837c6465decdb11177334f524f8f1dc1b014845bfca",
+  "token_count": 15666,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://www.fool.com/earnings/call-transcripts/2019/01/31/microsoft-msft-q2-2019-earnings-conference-call-tr.aspx\n# snapshot: https://web.archive.org/web/20190201000000id_/https://www.fool.com/earnings/call-transcripts/2019/01/31/microsoft-msft-q2-2019-earnings-conference-call-tr.aspx",
+  "pair_target": "MSFT"
+}

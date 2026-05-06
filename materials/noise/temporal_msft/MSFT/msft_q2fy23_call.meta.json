@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q2fy23_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q2 FY2023 Earnings Call Transcript",
+  "period_label": "Q2 FY2023 earnings call",
+  "fiscal_year": 2023,
+  "fiscal_quarter": 2,
+  "sha256": "f26955d2e76fdfe1661a06a9a487460d8b0764787b7614ca97b0cc058ef308ed",
+  "token_count": 16370,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: http://www.fool.com/earnings/call-transcripts/2023/01/24/microsoft-msft-q2-2023-earnings-call-transcript/\n# snapshot: https://web.archive.org/web/20230126000000id_/http://www.fool.com/earnings/call-transcripts/2023/01/24/microsoft-msft-q2-2023-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

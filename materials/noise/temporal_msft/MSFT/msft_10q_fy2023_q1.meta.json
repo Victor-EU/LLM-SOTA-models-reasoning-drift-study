@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_10q_fy2023_q1",
+  "noise_type": "temporal_msft",
+  "subpool": "10q",
+  "title": "Microsoft Corporation Form 10-Q Q1 FY2023",
+  "period_label": "Q1 FY2023",
+  "fiscal_year": 2023,
+  "fiscal_quarter": 1,
+  "sha256": "b189c035b665b7b55fa1ae9cd19b81dfd083538af03a9dc05711d95ee90ff1df",
+  "token_count": 48729,
+  "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000156459022035087/msft-10q_20220930.htm",
+  "pair_target": "MSFT"
+}

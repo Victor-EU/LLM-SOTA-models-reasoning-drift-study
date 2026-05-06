@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q2fy18_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q2 FY2018 Earnings Call Transcript",
+  "period_label": "Q2 FY2018 earnings call",
+  "fiscal_year": 2018,
+  "fiscal_quarter": 2,
+  "sha256": "25c2ff5908c865de9d341a2d1fd8b298ea496846ffc67ff89297643b0398eed9",
+  "token_count": 16547,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://www.fool.com/earnings/call-transcripts/2018/01/31/microsoft-corporation-msft-q2-2018-earnings-confer.aspx\n# snapshot: https://web.archive.org/web/20180206113655id_/https://www.fool.com/earnings/call-transcripts/2018/01/31/microsoft-corporation-msft-q2-2018-earnings-confer.aspx",
+  "pair_target": "MSFT"
+}

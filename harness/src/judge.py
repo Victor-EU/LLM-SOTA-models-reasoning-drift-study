@@ -40,6 +40,13 @@ from .api import CallResult, call_messages
 from .autograder import grade_record
 from .config import ExperimentConfig, AuxModelConfig
 from .cost import CostTracker
+from .grading import (
+    Distractor,
+    ScanResult,
+    apply_scope_cap,
+    load_distractors,
+    scan_record,
+)
 from .manifest import Manifest, Stage
 from .materials import GroundTruth, Materials, TargetBundle
 from .persistence import WriterCache
@@ -133,7 +140,7 @@ def _format_anchors(gt: GroundTruth) -> str:
 class AbsoluteJudgement:
     groundedness: int
     evidentiary_breadth: int
-    scope_adherence: int
+    scope_adherence: int                 # raw judge value (1..5)
     clarity: int
     citation_accuracy: int
     unsupported_claims: int
@@ -144,6 +151,15 @@ class AbsoluteJudgement:
     frameworks_applied: int | None
     synthesis_consistent: bool | None
     brief_justification: str
+    # v3 additions (TEMPORAL_NOISE_ADDENDUM.md §5):
+    # - temporal_contamination: count of prior-MSFT-period misattributions.
+    #   Populated programmatically for temporal arms; 0 for peer arms.
+    # - scope_adherence_capped: scope_adherence after applying the §5.2 cap
+    #   via grading.scope_cap.apply_scope_cap. Equals scope_adherence
+    #   whenever neither contamination metric fires. Persisted alongside the
+    #   raw judge value so the cap is auditable.
+    temporal_contamination: int = 0
+    scope_adherence_capped: int = 0
 
 
 async def judge_absolute(
@@ -189,19 +205,32 @@ async def judge_absolute(
     )
     parsed = _parse_judgement_obj(result.text)
     is_q8 = q_id == "MSFT-S-03"
+    raw_scope = _int(parsed.get("scope_adherence"), default=3, lo=1, hi=5)
+    cross = _int(parsed.get("cross_contamination"), default=0, lo=0, hi=999)
+    # temporal_contamination is judge-emitted only when the addendum-extended
+    # judge prompt is in use (temporal arms). Defaults to 0 — peer arms see
+    # an unchanged scope_adherence_capped via the cap reduction below.
+    temporal = _int(parsed.get("temporal_contamination"), default=0, lo=0, hi=999)
+    capped_scope = apply_scope_cap(
+        scope_adherence=raw_scope,
+        cross_contamination=cross,
+        temporal_contamination=temporal,
+    )
     judgement = AbsoluteJudgement(
         groundedness=_int(parsed.get("groundedness"), default=3, lo=1, hi=5),
         evidentiary_breadth=_int(parsed.get("evidentiary_breadth"), default=3, lo=1, hi=5),
-        scope_adherence=_int(parsed.get("scope_adherence"), default=3, lo=1, hi=5),
+        scope_adherence=raw_scope,
         clarity=_int(parsed.get("clarity"), default=3, lo=1, hi=5),
         citation_accuracy=_int(parsed.get("citation_accuracy"), default=3, lo=1, hi=5),
         unsupported_claims=_int(parsed.get("unsupported_claims"), default=0, lo=0, hi=999),
-        cross_contamination=_int(parsed.get("cross_contamination"), default=0, lo=0, hi=999),
+        cross_contamination=cross,
         reasoning_quality=_int(parsed.get("reasoning_quality"), default=5, lo=0, hi=10),
         units_decomposed=_int(parsed.get("units_decomposed"), default=None, lo=0, hi=20) if is_q8 else None,
         frameworks_applied=_int(parsed.get("frameworks_applied"), default=None, lo=0, hi=4) if is_q8 else None,
         synthesis_consistent=_bool(parsed.get("synthesis_consistent")) if is_q8 else None,
         brief_justification=str(parsed.get("brief_justification", "")),
+        temporal_contamination=temporal,
+        scope_adherence_capped=capped_scope,
     )
     return judgement, result
 
@@ -341,6 +370,22 @@ async def run_grade_stage(
         log.warning("no extracted records found — extract stage must run first")
         return
 
+    # 1b. Load temporal distractors for v3 temporal arms (TEMPORAL_NOISE_ADDENDUM
+    # §5.1). Gated on the arm's noise_types — peer arms never load the file
+    # (so the scanner is a no-op for them and v1/v2 graded outputs remain
+    # schema-compatible). When loaded, scan_record() runs on every Tier-1/2/3
+    # record and the count overrides judge.AbsoluteJudgement.temporal_contamination.
+    distractors_by_qid: dict[str, list[Distractor]] = {}
+    if "temporal_msft" in cfg.design.noise_types:
+        dpath = cfg.paths.materials_dir / "ground_truth" / "MSFT_temporal_distractors.json"
+        if dpath.exists():
+            distractors_by_qid = load_distractors(dpath)
+            log.info("temporal_scan: loaded %d distractor lists from %s",
+                     len(distractors_by_qid), dpath)
+        else:
+            log.warning("temporal arm requested but %s not found — temporal_contamination will be 0",
+                        dpath)
+
     # 2. Index baseline responses (rep_idx -> q_id -> answer text) for pairwise.
     baseline_responses: dict[int, dict[str, str]] = defaultdict(dict)
     for rid, q_recs in extracted_by_run.items():
@@ -403,11 +448,21 @@ async def run_grade_stage(
             # Tier 1/2: local autograder. No API call.
             if gt.tier in (1, 2):
                 ag = grade_record(rec, materials)
-                return {**common, "autograde": asdict(ag) if ag else None}
+                out: dict[str, Any] = {**common, "autograde": asdict(ag) if ag else None}
+                # v3: programmatic temporal scan (no-op for peer arms).
+                if distractors_by_qid:
+                    scan = scan_record(rec, distractors_by_qid)
+                    out["temporal"] = scan.to_dict()
+                return out
 
             # Tier 3: judge_absolute. Optionally pairwise + secondary.
             cand_text = rec.get("answer_raw") or rec.get("answer_normalized") or ""
             qprompt = questions_by_id.get(q_id, "")
+
+            # v3: scan once up-front; reuse for primary, secondary overrides.
+            tier3_scan: ScanResult | None = None
+            if distractors_by_qid:
+                tier3_scan = scan_record(rec, distractors_by_qid)
 
             out: dict[str, Any] = dict(common)
 
@@ -431,7 +486,20 @@ async def run_grade_stage(
                         run_id=run_id,
                         stage=Stage.GRADE,
                     )
-                    out["absolute"] = asdict(j_abs)
+                    abs_dict = asdict(j_abs)
+                    # v3 override: programmatic temporal_contamination + cap
+                    # recomputation. The judge prompt does NOT ask for
+                    # temporal_contamination (kept byte-identical to v2 for
+                    # judge instrument equivalence) — so the judge field is
+                    # always 0. The scanner is the source of truth.
+                    if tier3_scan is not None:
+                        abs_dict["temporal_contamination"] = tier3_scan.count
+                        abs_dict["scope_adherence_capped"] = apply_scope_cap(
+                            scope_adherence=abs_dict["scope_adherence"],
+                            cross_contamination=abs_dict["cross_contamination"],
+                            temporal_contamination=tier3_scan.count,
+                        )
+                    out["absolute"] = abs_dict
                     out["absolute_meta"] = {
                         "latency_seconds": call_abs.latency_seconds,
                         "thinking_tokens": call_abs.usage.thinking_tokens,
@@ -439,6 +507,9 @@ async def run_grade_stage(
                 except Exception as e:  # noqa: BLE001
                     log.exception("absolute judge failed for %s/%s: %s", run_id, q_id, e)
                     out["absolute_error"] = repr(e)
+
+            if tier3_scan is not None:
+                out["temporal"] = tier3_scan.to_dict()
 
             # 25% pairwise subsample (non-baseline only; baseline can't be paired with itself).
             if not is_baseline_run and should_pairwise(run_id, q_id, 0.25):
@@ -494,7 +565,15 @@ async def run_grade_stage(
                             run_id=run_id,
                             stage=Stage.GRADE,
                         )
-                        out["secondary"] = asdict(j_sec)
+                        sec_dict = asdict(j_sec)
+                        if tier3_scan is not None:
+                            sec_dict["temporal_contamination"] = tier3_scan.count
+                            sec_dict["scope_adherence_capped"] = apply_scope_cap(
+                                scope_adherence=sec_dict["scope_adherence"],
+                                cross_contamination=sec_dict["cross_contamination"],
+                                temporal_contamination=tier3_scan.count,
+                            )
+                        out["secondary"] = sec_dict
                     except Exception as e:  # noqa: BLE001
                         log.exception("secondary judge failed for %s/%s: %s", run_id, q_id, e)
                         out["secondary_error"] = repr(e)

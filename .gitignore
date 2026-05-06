@@ -35,3 +35,8 @@ venv/
 # never the locked artifact). Prior runs left *.jsonl.bak / *.jsonl.bak2.
 *.bak
 *.bak[0-9]*
+
+# Runtime logs from harness scripts — useful for live debugging but not part of
+# the locked artifact. The graded/cross_judged JSONLs under arms/ are the
+# reproducible record; logs are noisy and not deterministic across runs.
+harness/logs/

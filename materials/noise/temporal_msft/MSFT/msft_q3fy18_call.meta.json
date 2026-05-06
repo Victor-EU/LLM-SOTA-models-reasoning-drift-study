@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q3fy18_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q3 FY2018 Earnings Call Transcript",
+  "period_label": "Q3 FY2018 earnings call",
+  "fiscal_year": 2018,
+  "fiscal_quarter": 3,
+  "sha256": "b1ecd7d02691707adaa54cdde4b15e5fd1556169c85dc19a89301f0d35405e32",
+  "token_count": 17640,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://www.fool.com/earnings/call-transcripts/2018/04/26/microsoft-corporation-msft-q3-2018-earnings-confer.aspx\n# snapshot: https://web.archive.org/web/20180527000000id_/https://www.fool.com/earnings/call-transcripts/2018/04/26/microsoft-corporation-msft-q3-2018-earnings-confer.aspx",
+  "pair_target": "MSFT"
+}

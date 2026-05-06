@@ -1,0 +1,58 @@
+# GPT-5.5 — temporal-noise variant (v3 methodology).
+#
+# Same analyst snapshot, vendor SDK, thinking config, temperature, and
+# max_output_tokens as gpt-5-5.yaml; only the noise type changes. Temporal
+# arms are paired 1:1 with their peer counterparts so the cross-noise
+# comparison at matched analyst is apples-to-apples (modulo §4.2 suffix —
+# disclosed per §10).
+#
+# v3 methodology — see TEMPORAL_NOISE_ADDENDUM.md for the full addendum
+# specification. Recommended as the FIRST temporal arm to lock (§6.3
+# rationale: the v2 floor finding cross_contamination=0 for GPT-5.5 across
+# all 91 runs is the most informative baseline to test under temporal noise).
+
+experiment:
+  # v3 hash = sha256(DESIGN + PROMPTS + RUBRIC + MULTI_VENDOR_ADDENDUM + TEMPORAL_NOISE_ADDENDUM).
+  # Computed 2026-05-05 from the v0.2 addendum bytes.
+  pre_registration_hash: "10ebe9f1ea30d98fdf5453074867fee54c1e047b1463f692ac66d89a939a8043"
+
+arm:
+  name: gpt-5-5-temporal
+  description: "OpenAI GPT-5.5 (xhigh reasoning) under temporal_msft noise. v3 first-priority arm."
+
+models:
+  analyst:
+    vendor: openai
+    snapshot: "gpt-5.5-2026-04-23"
+    snapshot_note: |
+      Identical analyst configuration to gpt-5-5.yaml (the peer-noise arm).
+      Only the noise type changes. Same dated snapshot, same xhigh effort,
+      same 1M context, same encrypted-reasoning capture.
+    context_window: 1050000
+    thinking_effort: null
+    thinking_config:
+      reasoning:
+        effort: xhigh
+        summary: auto
+    max_output_tokens: 128000
+    temperature: 1.0
+
+# ------------------------------------------------------------------
+# Design grid — temporal noise type, full v1/v2-shaped grid.
+# ------------------------------------------------------------------
+design:
+  fill_levels: [0.00, 0.25, 0.50, 0.75, 0.95]
+  positions: [start, middle, end]
+  noise_types: [temporal_msft]
+  reports: [MSFT]
+  reps_per_cell: 7
+
+# Pilot subset per TEMPORAL_NOISE_ADDENDUM.md §6.4 — three cells, ~$45/arm.
+# Same go/no-go criteria as DESIGN §11 (parse rate >= 98%, ICC >= 0.70,
+# realized fill within +/- 500 tokens, pool_utilization_pct <= 0.90 at the
+# 95-cell, pilot cost within 2x projection).
+pilot:
+  cells:
+    - {report: MSFT, fill: 0.00, position: null, noise: null}
+    - {report: MSFT, fill: 0.50, position: middle, noise: temporal_msft}
+    - {report: MSFT, fill: 0.95, position: middle, noise: temporal_msft}

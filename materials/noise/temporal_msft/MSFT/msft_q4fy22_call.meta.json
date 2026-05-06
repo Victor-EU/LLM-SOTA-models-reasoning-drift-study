@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q4fy22_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q4 FY2022 Earnings Call Transcript",
+  "period_label": "Q4 FY2022 earnings call",
+  "fiscal_year": 2022,
+  "fiscal_quarter": 4,
+  "sha256": "862f38df65d539477cfbc55b73ef91a31ff3954b419c10c848bf9e6e9482da40",
+  "token_count": 14713,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://news.alphastreet.com/microsoft-corporation-msft-q4-2022-earnings-call-transcript/\n# snapshot: https://web.archive.org/web/20220727033001id_/https://news.alphastreet.com/microsoft-corporation-msft-q4-2022-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

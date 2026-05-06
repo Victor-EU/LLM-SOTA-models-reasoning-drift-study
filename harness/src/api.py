@@ -348,6 +348,15 @@ def _is_retriable_openai(exc: BaseException) -> bool:
                         httpx.WriteError, httpx.ConnectError, httpx.ConnectTimeout,
                         httpx.PoolTimeout)):
         return True
+    # OpenAI Responses streaming has been observed to occasionally drain to
+    # completion without ever emitting a `response.completed` event — measured
+    # at ~3% on gpt-5.5 xhigh during the v3 full-grid run (2026-05-05). The
+    # call returns 200, the stream closes cleanly, but the assembled response
+    # never lands. _openai_stream_to_final raises a custom RuntimeError on
+    # this; treat as transient and retry. Real model errors surface as OAI
+    # exceptions and won't match this string.
+    if isinstance(exc, RuntimeError) and "response.completed" in str(exc):
+        return True
     return False
 
 

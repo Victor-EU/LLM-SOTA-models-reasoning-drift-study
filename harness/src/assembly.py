@@ -25,8 +25,15 @@ from dataclasses import dataclass, field
 from typing import Any, Iterable
 
 from .cells import CellSpec, RunSpec
+from .disambiguation import suffix_for_tier
 from .materials import Materials, NoiseDoc, Question, TargetBundle
 from .prompts import ANALYST_SYSTEM_PROMPT
+
+
+# Noise-type sentinel: the v1/v2 default. When cell.noise_type equals this
+# value the assembler MUST behave byte-identically to v2 — same noise seeds,
+# no question-suffix appended. Per TEMPORAL_NOISE_ADDENDUM.md §10/§11.
+_PEER_NOISE_TYPE: str = "peer_materials"
 
 
 # ---- seeds ----------------------------------------------------------------
@@ -159,7 +166,19 @@ def format_target_block(bundle: TargetBundle) -> str:
     )
 
 
-def format_question_block(bundle: TargetBundle, questions: list[Question]) -> str:
+def format_question_block(
+    bundle: TargetBundle,
+    questions: list[Question],
+    *,
+    apply_disambiguation_suffix: bool = False,
+) -> str:
+    """
+    Render the question block.
+
+    `apply_disambiguation_suffix` MUST be False for noise_type=peer_materials
+    (preserves v2 byte-identity). MUST be True for noise_type=temporal_msft —
+    appends the §4.2 per-tier sentence to each question.
+    """
     header = (
         f"=== QUESTIONS ===\n"
         f"You are answering {len(questions)} questions about {bundle.company_name} "
@@ -171,18 +190,22 @@ def format_question_block(bundle: TargetBundle, questions: list[Question]) -> st
 
     sections: list[str] = [header]
     if tier1:
-        sections.append("— TIER 1: FACTUAL —\n" + _render_q_list(tier1))
+        sections.append("— TIER 1: FACTUAL —\n" + _render_q_list(tier1, apply_disambiguation_suffix))
     if tier2:
-        sections.append("— TIER 2: CALCULATION —\n" + _render_q_list(tier2))
+        sections.append("— TIER 2: CALCULATION —\n" + _render_q_list(tier2, apply_disambiguation_suffix))
     if tier3:
-        sections.append("— TIER 3: SYNTHESIS —\n" + _render_q_list(tier3))
+        sections.append("— TIER 3: SYNTHESIS —\n" + _render_q_list(tier3, apply_disambiguation_suffix))
 
     sections.append("=== END QUESTIONS ===\n\nRespond now with the JSON array. No prose outside the JSON.")
     return "\n\n".join(sections)
 
 
-def _render_q_list(qs: list[Question]) -> str:
-    return "\n".join(f"[id: {q.q_id}] {q.prompt}" for q in qs)
+def _render_q_list(qs: list[Question], apply_disambiguation_suffix: bool = False) -> str:
+    if not apply_disambiguation_suffix:
+        return "\n".join(f"[id: {q.q_id}] {q.prompt}" for q in qs)
+    return "\n".join(
+        f"[id: {q.q_id}] {q.prompt} {suffix_for_tier(q.tier)}" for q in qs
+    )
 
 
 # ---- assembled prompt ----------------------------------------------------
@@ -223,21 +246,35 @@ def assemble(
     questions = materials.questions[cell.report_id]
     noise_pool = _select_noise_pool(materials, cell)
 
+    # Per TEMPORAL_NOISE_ADDENDUM.md §10/§11: the noise seed gains noise_type
+    # as a fifth input — but ONLY for non-peer noise types. Peer arms see the
+    # v1/v2 seed function unchanged (peer_materials is the unsalted default),
+    # so v1/v2 cells and v2 stored prompts remain byte-identical.
+    if cell.noise_type and cell.noise_type != _PEER_NOISE_TYPE:
+        noise_a_seed = _seed(cell.cell_id, "noise_a", cell.noise_type)
+        noise_b_seed = _seed(cell.cell_id, "noise_b", cell.noise_type)
+    else:
+        noise_a_seed = _seed(cell.cell_id, "noise_a")
+        noise_b_seed = _seed(cell.cell_id, "noise_b")
+
     noise_a_docs = sample_noise(
         pool=noise_pool,
         target_tokens=noise_a_token_budget,
-        seed=_seed(cell.cell_id, "noise_a"),
+        seed=noise_a_seed,
     )
     noise_b_docs = sample_noise(
         pool=noise_pool,
         target_tokens=noise_b_token_budget,
-        seed=_seed(cell.cell_id, "noise_b"),
+        seed=noise_b_seed,
     )
 
     ordered_questions = shuffle_questions(
         questions,
         seed=_seed(run.run_id, "questions"),
     )
+
+    # Per §4.2: disambiguation suffix appended ONLY under temporal_msft noise.
+    apply_suffix = cell.noise_type == "temporal_msft"
 
     # ----- system -----
     system = [_block(ANALYST_SYSTEM_PROMPT, cacheable=True)]
@@ -255,7 +292,14 @@ def assemble(
     if noise_b_docs:
         user_blocks.append(_block(format_noise_block("B", noise_b_docs), cacheable=True))
     # The question block is NOT cached.
-    user_blocks.append(_block(format_question_block(bundle, ordered_questions), cacheable=False))
+    user_blocks.append(_block(
+        format_question_block(
+            bundle,
+            ordered_questions,
+            apply_disambiguation_suffix=apply_suffix,
+        ),
+        cacheable=False,
+    ))
 
     messages = [{"role": "user", "content": user_blocks}]
 

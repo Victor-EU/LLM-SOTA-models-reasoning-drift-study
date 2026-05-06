@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q3fy23_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q3 FY2023 Earnings Call Transcript",
+  "period_label": "Q3 FY2023 earnings call",
+  "fiscal_year": 2023,
+  "fiscal_quarter": 3,
+  "sha256": "cf49861f2727e279c1fb7f80487f27044948b9ac30a2a3299f26dce6ed396743",
+  "token_count": 14531,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://news.alphastreet.com/microsoft-corporation-msft-q3-2023-earnings-call-transcript/\n# snapshot: https://web.archive.org/web/20230428103502id_/https://news.alphastreet.com/microsoft-corporation-msft-q3-2023-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

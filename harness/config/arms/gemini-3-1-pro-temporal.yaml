@@ -1,0 +1,54 @@
+# Gemini 3.1 Pro — temporal-noise variant (v3 methodology).
+#
+# Same analyst snapshot, thinking config, temperature, and max_output_tokens
+# as gemini-3-1-pro.yaml; only the noise type changes. v3 anticipated arm.
+#
+# Why gemini-temporal: cheapest analyst in the v2 grid ($35 across 91 runs).
+# Adds a non-Anthropic, non-OpenAI vendor to the v3 H6 evidence base. If the
+# H6 null replicates here, it's vendor-invariant; if Gemini diverges that
+# would be a meaningful finding (Google's training mix differs from
+# Anthropic/OpenAI in ways the public docs don't fully reveal).
+
+experiment:
+  # v3 hash = sha256(DESIGN + PROMPTS + RUBRIC + MULTI_VENDOR_ADDENDUM + TEMPORAL_NOISE_ADDENDUM).
+  pre_registration_hash: "10ebe9f1ea30d98fdf5453074867fee54c1e047b1463f692ac66d89a939a8043"
+
+arm:
+  name: gemini-3-1-pro-temporal
+  description: "Google Gemini 3.1 Pro Preview with thinking_level=HIGH under temporal_msft noise. v3 anticipated arm."
+
+models:
+  analyst:
+    vendor: google
+    snapshot: "gemini-3-pro-preview"
+    snapshot_note: |
+      Google Gemini 3.x Pro Preview. Snapshot string is a mutable alias —
+      gemini-3-pro-preview redirects to current 3.1 Pro on the Gemini API.
+      The harness logs model_version returned per call into raw records as
+      the per-call build identifier. thinking_level=HIGH is the vendor max.
+      Encrypted thought signatures are exposed per part when
+      include_thoughts=true; raw chain-of-thought is not exposed.
+    context_window: 1048576
+    # MUST be null for non-Anthropic vendors (config validator enforces).
+    thinking_effort: null
+    thinking_config:
+      thinking_level: HIGH
+    max_output_tokens: 64000
+    temperature: 1.0
+
+design:
+  fill_levels: [0.00, 0.25, 0.50, 0.75, 0.95]
+  positions: [start, middle, end]
+  noise_types: [temporal_msft]
+  reports: [MSFT]
+  reps_per_cell: 7
+
+pilot:
+  cells:
+    - {report: MSFT, fill: 0.00, position: null, noise: null}
+    - {report: MSFT, fill: 0.50, position: middle, noise: temporal_msft}
+    - {report: MSFT, fill: 0.95, position: middle, noise: temporal_msft}
+
+# Default base.yaml cost cap ($700/$850) is sufficient. Gemini analyst is
+# the cheapest in the v2 grid ($35 / 91 runs); v3 full-grid projection
+# (~$680) sits comfortably under the default hard_stop.

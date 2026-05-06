@@ -67,20 +67,19 @@ def discover_arms(restrict: list[str] | None = None) -> list[tuple[str, Path, di
 def valid_methodology_hashes() -> dict[str, str]:
     """Return {hash → version_label} for every accepted methodology hash.
 
-    Loads pre_registration.lock (v1) and pre_registration.v2.lock (v2 if
-    present). Adding more lock files in future = adding more entries here.
+    Per TEMPORAL_NOISE_ADDENDUM.md §10 + MULTI_VENDOR_ADDENDUM.md §1: an arm
+    passes the gate if its pre_registration.hash matches v1 OR v2 OR v3.
+    Adding a future v4 lock = adding one (filename, label) pair here.
     """
     out: dict[str, str] = {}
-    v1 = PROJECT_ROOT / "pre_registration.lock"
-    v2 = PROJECT_ROOT / "pre_registration.v2.lock"
-    if v1.exists():
-        h = json.loads(v1.read_text(encoding="utf-8")).get("methodology_hash")
-        if h:
-            out[h] = "v1"
-    if v2.exists():
-        h = json.loads(v2.read_text(encoding="utf-8")).get("methodology_hash")
-        if h:
-            out[h] = "v2"
+    for fname, label in [("pre_registration.lock", "v1"),
+                         ("pre_registration.v2.lock", "v2"),
+                         ("pre_registration.v3.lock", "v3")]:
+        p = PROJECT_ROOT / fname
+        if p.exists():
+            h = json.loads(p.read_text(encoding="utf-8")).get("methodology_hash")
+            if h:
+                out[h] = label
     return out
 
 

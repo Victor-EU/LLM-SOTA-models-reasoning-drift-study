@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q4fy21_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q4 FY2021 Earnings Call Transcript",
+  "period_label": "Q4 FY2021 earnings call",
+  "fiscal_year": 2021,
+  "fiscal_quarter": 4,
+  "sha256": "4c88d6ea7f7ac6c524dcbb2f4852d920360bec8670cacdc5b3fa8a6421b26117",
+  "token_count": 14466,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://news.alphastreet.com/microsoft-corp-msft-q4-2021-earnings-call-transcript/\n# snapshot: https://web.archive.org/web/20251209000000id_/https://news.alphastreet.com/microsoft-corp-msft-q4-2021-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

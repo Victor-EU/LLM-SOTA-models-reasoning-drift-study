@@ -1,0 +1,232 @@
+{
+  "$schema_version": "3.0",
+  "experiment_name": "opus-4.7-reasoning-drift",
+
+  "version_lineage": {
+    "supersedes": null,
+    "extends": "pre_registration.v2.lock",
+    "extends_hash": "3433f4a67cde4b24b92a1b41a78271aa5dbb4572beb2ee23e1d8c2c31d189e8e",
+    "rule": "v3 = v2 + TEMPORAL_NOISE_ADDENDUM.md. v1 and v2 lock files are unchanged. v1 and v2 arms remain valid evidence under v3 by inheritance — the addendum only ADDS scope (admits the temporal_msft noise type and a noise-type-conditional question disambiguation suffix), it does not change the v1/v2 task, materials, prompts, rubric, design grid, extractor, or judge configuration."
+  },
+
+  "methodology_files": [
+    "DESIGN.md",
+    "PROMPTS.md",
+    "RUBRIC.md",
+    "MULTI_VENDOR_ADDENDUM.md",
+    "TEMPORAL_NOISE_ADDENDUM.md"
+  ],
+  "methodology_hash": "10ebe9f1ea30d98fdf5453074867fee54c1e047b1463f692ac66d89a939a8043",
+  "methodology_hash_recipe": "sha256 of DESIGN.md + PROMPTS.md + RUBRIC.md + MULTI_VENDOR_ADDENDUM.md + TEMPORAL_NOISE_ADDENDUM.md concatenated as raw bytes (no separator)",
+  "methodology_hash_reproduce": "python3 -c \"import hashlib; print(hashlib.sha256(b''.join(open(f, 'rb').read() for f in ['DESIGN.md','PROMPTS.md','RUBRIC.md','MULTI_VENDOR_ADDENDUM.md','TEMPORAL_NOISE_ADDENDUM.md'])).hexdigest())\"",
+
+  "methodology_file_individual_sha256": {
+    "DESIGN.md": "d8623285a7b545444de4efcb42d2c82aecba197fb495797980e6488aa81d0805",
+    "PROMPTS.md": "bf1c39044a86543cddfe664f2aa8c3d8b6adeb326d3cde25d536a9181365e2d0",
+    "RUBRIC.md": "65552543cf702fb9356400ad0a32d2ccc88845b4d7ee10f63a2a07dca42a12a9",
+    "MULTI_VENDOR_ADDENDUM.md": "11e7715d7addb5523d035110bb0f44e44ee3abffe47ceb29889275bb9df64592",
+    "TEMPORAL_NOISE_ADDENDUM.md": "b493672762db4003a2a4b664bd7e4d6c81228778309e4f5a65ef96c8f9f56f77"
+  },
+
+  "methodology_hash_history": [
+    {
+      "hash": "<v0.1 addendum hash, see TEMPORAL_NOISE_ADDENDUM.md change summary>",
+      "addendum_version": "0.1",
+      "locked_at": null,
+      "superseded_at": "2026-05-05",
+      "supersede_reason": "v0.1 was the pre-acquisition aspirational spec. v0.2 amended §3.1 to reflect the attainable corpus (34 files, not 52) and added §3.1c documenting the source-availability ceiling. No locked v3 arms exist at v0.1 hash, so no arm.lock.json invalidation."
+    }
+  ],
+
+  "materials_lock_path": "materials/materials.lock.json",
+  "materials_lock_hash": "c13b5514279c9d8dbc5118ec9b3b1325a0cff56c4fb1cee8d66992a98cd25199",
+  "materials_lock_hash_recipe": "sha256 of materials/materials.lock.json file bytes (UNCHANGED from v1/v2 — same target + peer materials, no rehash)",
+
+  "materials_temporal_lock_path": "materials/materials_temporal.lock.json",
+  "materials_temporal_lock_hash": "6a40a700a38799f908d3cf99cd4d84a1e4ce32ceeb2d7d7e004997a456d4748d",
+  "materials_temporal_lock_hash_recipe": "sha256 of materials/materials_temporal.lock.json file bytes",
+  "materials_temporal_summary": {
+    "noise_pool_path": "materials/noise/temporal_msft/MSFT/",
+    "noise_pool_files": 34,
+    "noise_pool_files_breakdown": {
+      "10k": 2,
+      "10q": 9,
+      "earnings_call": 23
+    },
+    "noise_pool_total_tokens": 991380,
+    "pool_utilization_pct_at_95_cell": 86.2,
+    "section_6_4_gate": "PASS (≤90%)",
+    "attainable_corpus_note": "v0.2 attainable corpus per TEMPORAL_NOISE_ADDENDUM.md §3.1c. The aspirational v0.1 spec was 52 files; 18 of 41 prior earnings-call transcripts are unobtainable from any indexed source.",
+    "distractors_file": "materials/ground_truth/MSFT_temporal_distractors.json",
+    "noise_screening_log": "materials/noise_screening_log.md"
+  },
+
+  "materials_corpus_summary": {
+    "target_company": "MSFT",
+    "target_files": [
+      "target/MSFT/10k.txt (FY2025 10-K)",
+      "target/MSFT/earnings_call.txt (Q2 FY2026 call)"
+    ],
+    "ground_truth_file": "ground_truth/MSFT.json",
+    "questions_file": "questions/MSFT.json",
+    "peer_noise_pool": "noise/peer_materials/MSFT/{aapl,amzn,crm,googl,meta,nvda,orcl}_10k_fy2025-2026.txt",
+    "temporal_noise_pool": "noise/temporal_msft/MSFT/* (34 files: 2 prior 10-Ks + 9 prior 10-Qs + 23 prior earnings-call transcripts)",
+    "temporal_distractor_list": "ground_truth/MSFT_temporal_distractors.json",
+    "noise_screening_log": "noise_screening_log.md"
+  },
+
+  "design_grid": {
+    "fill_levels": [0.00, 0.25, 0.50, 0.75, 0.95],
+    "positions": ["start", "middle", "end"],
+    "noise_types": ["peer_materials", "temporal_msft"],
+    "noise_types_allowed_per_arm": "Each arm runs ONE noise type. Peer arms set noise_types=[peer_materials]; temporal arms set noise_types=[temporal_msft]. Cross-arm comparison within a noise type is apples-to-apples; across noise types carries the §10 disclosure.",
+    "reports": ["MSFT"],
+    "reps_per_cell": 7,
+    "baseline_cells": 1,
+    "noise_cells": 12,
+    "total_cells": 13,
+    "total_runs_per_arm": 91,
+    "questions_per_run": 8,
+    "tiers": {
+      "tier_1_factual": ["F-01", "F-02", "F-03"],
+      "tier_2_calculation": ["C-01", "C-02"],
+      "tier_3_synthesis": ["S-01", "S-02", "S-03"]
+    },
+    "design_grid_note": "Same 13-cell shape across v1/v2/v3 noise types so cross-noise comparison at every (fill, position) coordinate is apples-to-apples (modulo §4.2 suffix — see §10 disclosure)."
+  },
+
+  "prompt_assembly": {
+    "disambiguation_suffix_applied_when": "noise_type == 'temporal_msft'",
+    "disambiguation_suffix_source": "TEMPORAL_NOISE_ADDENDUM.md §4.2",
+    "disambiguation_suffix_module": "harness/src/disambiguation.py",
+    "disambiguation_suffix_hash": "009018d397afc7e1c5a47b4d23d9f0765452e6e1b924eaaadeba9f9bdbd06479",
+    "disambiguation_suffix_hash_recipe": "sha256 of (TIER1_SUFFIX + TIER2_SUFFIX + TIER3_SUFFIX) concatenated as raw UTF-8 bytes, no separator",
+    "peer_arm_byte_identity_invariant": "Under noise_type=peer_materials the assembler MUST produce a prompt byte-identical to v2: no §4.2 suffix, noise seeds equal to v2 (the noise_type input is omitted from the seed when the value is 'peer_materials'). Verified by harness/src/assembly.py:_PEER_NOISE_TYPE branching."
+  },
+
+  "noise_seeding_scheme": {
+    "peer_arms": "sha256(report|fill|position|rep) — UNCHANGED from v1/v2",
+    "temporal_arms": "sha256(report|fill|position|rep|noise_type) — adds noise_type as a fifth input ONLY when noise_type != 'peer_materials' (§11)",
+    "rationale": "Peer-arm seeds identical to v2 means v1/v2 arms remain valid evidence under v3 without re-running."
+  },
+
+  "instruments_held_constant_across_arms": {
+    "rationale": "The extractor is mechanical normalization; the judge is the measuring instrument. Both held constant across all arms (v1/v2/v3) so observed differences cannot be attributed to instrument drift. This is what makes cross-arm comparison meaningful.",
+    "extractor": {
+      "snapshot": "claude-haiku-4-5-20251001",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": null
+    },
+    "judge_primary": {
+      "snapshot": "claude-opus-4-7",
+      "max_output_tokens": 16384,
+      "temperature": 1.0,
+      "thinking_effort": "max"
+    },
+    "judge_secondary": {
+      "snapshot": "claude-sonnet-4-6",
+      "max_output_tokens": 8192,
+      "temperature": 1.0,
+      "thinking_effort": "high",
+      "subsample_pct": 20
+    },
+    "grading_modules": {
+      "scope_cap": {
+        "path": "harness/src/grading/scope_cap.py",
+        "sha256": "7b1689a8408ecdc901af7ee69b223d3e69093365eb94b77ae68c235f90edbe0e",
+        "rule": "Per RUBRIC.md §scope_adherence + TEMPORAL_NOISE_ADDENDUM.md §5.2: scope_adherence is capped at 3 when (cross_contamination + temporal_contamination) >= 1. Implemented in code as a safety net independent of judge compliance. For peer arms (temporal_contamination = 0), reduces to the v1/v2 rule. Bytes pinned here.",
+        "judge_field_added": "AbsoluteJudgement.scope_adherence_capped (judge.py) — persisted alongside the raw judge value so the cap is auditable post hoc."
+      },
+      "temporal_scan": {
+        "path": "harness/src/grading/temporal_scan.py",
+        "sha256": "b66ea5c126a0e5ff1f3e17c3e6375e10d3de05eac253b605a6dfe477f99f7fdc",
+        "rule": "Per TEMPORAL_NOISE_ADDENDUM.md §5.1: programmatic detector for temporal_contamination. Loads materials/ground_truth/MSFT_temporal_distractors.json once per grade run; per record, scans answer_normalized + answer_raw + citation for numeric matches against the q_id's distractor list with per-distractor tolerance. Count = number of distinct distractor VALUES matched (per §3.1b: as-filed + as-restated with the same value collapse to one count). Per-hit log preserves period/source/context for the §5.3 source-period diagnostic.",
+        "specificity_guards": "Two pre-filters drop ambiguous numeric mentions BEFORE distractor testing: (a) _is_specific_enough — bare 1-2-digit integers without $/%/scale/decimal/comma markers cannot reach distractor magnitudes meaningful at our tolerance and are universally rejected; (b) _in_citation_context — matches preceded by structural keywords (Item|Part|Page|Note|Section|Table|Exhibit|Appendix|Schedule|Figure) within a 20-char lookback are document-structure references, never financial values. Added 2026-05-05 after v3 pilot revealed 5 false positives of the form 'Item 7' falsely matching the 6.88% YoY-growth distractor inside rel_tol. End-to-end test coverage: pilot FP texts → 0 hits; legitimate prose / JSON-answer / EPS / percent patterns → preserved hits.",
+        "judge_field_overridden": "judge.py grade_q overrides AbsoluteJudgement.temporal_contamination AND AbsoluteJudgement.scope_adherence_capped (recomputed via scope_cap.apply_scope_cap with the programmatic count) for both primary (Opus) and secondary (Sonnet) judgements. Same scan result reused per record. Pairwise judge is unaffected (preference-only, no scope dimension).",
+        "peer_arm_safety": "Loader is gated on cfg.design.noise_types containing 'temporal_msft'. Peer arms never load distractors → scanner is a no-op → graded output schema unchanged. v1/v2 byte-equivalence preserved end-to-end.",
+        "judge_prompt_unchanged": "JUDGE_ABSOLUTE_SYSTEM_PROMPT is BYTE-IDENTICAL to v1/v2. The judge does not see temporal-distractor instructions; it cannot count temporal_contamination. The metric is purely programmatic, satisfying §11's 'judge_primary configuration held constant across all arms' invariant.",
+        "sha256_history": [
+          {
+            "sha256": "02ad83235edeb2e626c9d497287b9709f4cf88b842f266f5a27f3c05237937df",
+            "active_from": "2026-05-05 (v3 lock initial)",
+            "superseded_at": "2026-05-05 (post-pilot)",
+            "supersede_reason": "Pre-test scanner version. Pilot grade revealed 5 false positives (all 'Item 7' → 6.88% YoY-growth distractor within rel_tol) caused by missing specificity + citation-context guards in the regex pre-extractor. No legitimate hits were produced under this SHA. Pilot graded JSONL was programmatically rescanned with the new SHA; original graded files preserved at .v0-prescanfix-bak. Full-grid runs use the new SHA exclusively."
+          }
+        ]
+      }
+    }
+  },
+
+  "what_varies_across_arms": [
+    "models.analyst.vendor",
+    "models.analyst.snapshot",
+    "models.analyst.snapshot_note",
+    "models.analyst.context_window",
+    "models.analyst.thinking_config",
+    "models.analyst.thinking_effort (Anthropic only)",
+    "models.analyst.max_output_tokens",
+    "tokens.total_context_target (only when analyst context window differs)",
+    "tokens.report_token_cap (proportional to total_context_target)",
+    "design.noise_types (NEW in v3: [peer_materials] for v1/v2 arms; [temporal_msft] for *-temporal arms)",
+    "design_used.fill_levels_supported (subset of fill_levels_target if context-limited)",
+    "prompt_assembly.disambiguation_suffix_applied (NEW in v3: true for temporal arms; false for peer arms)"
+  ],
+
+  "what_must_not_vary_across_arms": [
+    "DESIGN.md, PROMPTS.md, RUBRIC.md (frozen by v1 hash, inherited by v2/v3)",
+    "MULTI_VENDOR_ADDENDUM.md (frozen by v2 hash, inherited by v3)",
+    "TEMPORAL_NOISE_ADDENDUM.md (frozen by v3 hash; pinned here)",
+    "materials/* under materials_lock_path (v1/v2 surface, byte-unchanged)",
+    "materials/* under materials_temporal_lock_path (v3 surface, pinned by materials_temporal_lock_hash)",
+    "design_grid shape (cells, fill levels, positions, reps, questions)",
+    "extractor configuration",
+    "judge_primary configuration (incl. JUDGE_ABSOLUTE_SYSTEM_PROMPT bytes — unchanged v1/v2/v3)",
+    "judge_secondary configuration",
+    "grading.scope_cap module bytes (pinned via instruments_held_constant.grading_modules.scope_cap.sha256)",
+    "grading.temporal_scan module bytes (pinned via instruments_held_constant.grading_modules.temporal_scan.sha256)",
+    "harness/src/disambiguation.py suffix bytes (pinned via prompt_assembly.disambiguation_suffix_hash)",
+    "noise pool seeding scheme — sha256(report|fill|position|rep[|noise_type for non-peer])"
+  ],
+
+  "v1_arms_inheritance": {
+    "rule": "Arms locked under v1 (pre_registration.hash = 61b2d30f...) are valid evidence under v3 without re-locking.",
+    "rationale": "v3 only adds scope. The v1 methodology is a strict subset of the v3 methodology.",
+    "arms_grandfathered_under_v1": ["opus-4-7", "sonnet-4-6"]
+  },
+  "v2_arms_inheritance": {
+    "rule": "Arms locked under v2 (pre_registration.hash = 3433f4a6...) are valid evidence under v3 without re-locking.",
+    "rationale": "v3 only adds scope. The v2 methodology is a strict subset of the v3 methodology.",
+    "arms_grandfathered_under_v2": ["gpt-5-5", "gemini-3-1-pro", "deepseek-v4-pro"]
+  },
+
+  "compare_arms_acceptance": {
+    "rule": "compare_arms.py accepts an arm whose pre_registration.hash equals v1 OR v2 OR v3, and refuses any other value.",
+    "v1_hash": "61b2d30f0c741bd96f24159fedc814276df565de317f780e117a3c7e32100419",
+    "v2_hash": "3433f4a67cde4b24b92a1b41a78271aa5dbb4572beb2ee23e1d8c2c31d189e8e",
+    "v3_hash": "10ebe9f1ea30d98fdf5453074867fee54c1e047b1463f692ac66d89a939a8043",
+    "cross_noise_type_disclosure": "Tables that mix arms from more than one noise type carry the §10 disclosure (cross-noise comparison is not apples-to-apples — prompts differ by §4.2 suffixes, fill labels refer to noise-type-specific pools)."
+  },
+
+  "v3_authorized_arms_at_lock_time": {
+    "policy": "v3 arms are authored and locked individually. This entry lists the arms whose harness/config/arms/*.yaml files reference this lock's methodology_hash and which are authorized to run under v3 once their per-arm arm.lock.json is written.",
+    "arms_authored": [
+      "gpt-5-5-temporal (priority 1, per §6.3)",
+      "opus-4-7-temporal (priority 2, per §6.3)",
+      "sonnet-4-6-temporal (authored 2026-05-05 — same Anthropic family as opus-4-7-temporal, model-class diversity within Anthropic)",
+      "gemini-3-1-pro-temporal (authored 2026-05-05 — adds Google to v3 vendor coverage)",
+      "deepseek-v4-pro-temporal (authored 2026-05-05 — adds DeepSeek to v3 vendor coverage)"
+    ],
+    "arms_anticipated_follow_on": []
+  },
+
+  "isolation_invariants": {
+    "v1_v2_lock_unchanged": "materials/materials.lock.json bytes are byte-identical to the v2 lock state. Verified by harness/scripts/verify_v3_isolation.py.",
+    "v1_v2_files_unchanged": "All 11 files referenced by materials.lock.json (1 ground_truth + 1 questions + 7 peer 10-Ks + 2 target) are byte-identical to their lock entries.",
+    "v3_surface_separate": "All v3 additions live under disjoint paths: materials/materials_temporal.lock.json, materials/noise/temporal_msft/, materials/noise_screening_log.md, materials/ground_truth/MSFT_temporal_distractors.json, harness/src/grading/, harness/src/disambiguation.py, harness/config/arms/*-temporal.yaml. No v1/v2 path is touched."
+  },
+
+  "locked_at": "2026-05-05",
+  "locked_by": "Victor Zhang <victor.zhang.eu@gmail.com>",
+  "lock_notes": "v3 lock authorizes the temporal_msft noise type and the *-temporal arm naming convention. Materials acquisition complete (34/52 files; 18 unobtainable per §3.1c). All methodology-surface code (scope_cap.py, temporal_scan.py, disambiguation.py) extracted and SHA-pinned. Programmatic temporal_contamination detection wired into judge.py grade_q (overrides AbsoluteJudgement.temporal_contamination + scope_adherence_capped on both primary and secondary judges; gated on noise_type=temporal_msft so peer arms remain byte-equivalent to v2). Hand-screen log + temporal-distractors file populated for pilot. Two arm yamls authored at priority 1/2. Pilot of gpt-5-5-temporal completed 2026-05-05 ($107.47, 21/21 runs); revealed 5 scanner false positives of the form 'Item 7' → 6.88% distractor (rel_tol fire on bare 1-digit integer in citation context). Scanner SHA bumped 2026-05-05 from 02ad8323… to b66ea5c1… with two pre-extract guards (specificity + citation-context); pilot graded JSONLs rescanned in place against the new scanner; original files preserved at .v0-prescanfix-bak. Full grid for gpt-5-5-temporal cleared to launch under the corrected scanner. See instruments_held_constant_across_arms.grading_modules.temporal_scan.sha256_history for the audit trail."
+}

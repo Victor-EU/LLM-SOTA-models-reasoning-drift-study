@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q4fy20_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q4 FY2020 Earnings Call Transcript",
+  "period_label": "Q4 FY2020 earnings call",
+  "fiscal_year": 2020,
+  "fiscal_quarter": 4,
+  "sha256": "9e46666547d8222649692627a851e23c18da77a752f5c4a1350161e8e82a278d",
+  "token_count": 13929,
+  "source_url": "https://news.alphastreet.com/microsoft-corp-msft-q4-2020-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

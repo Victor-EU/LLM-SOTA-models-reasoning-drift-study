@@ -1,0 +1,46 @@
+# Opus 4.7 — temporal-noise variant (v3 methodology).
+#
+# Same analyst snapshot, thinking config, temperature, and max_output_tokens
+# as opus-4-7.yaml; only the noise type changes. Recommended as the SECOND
+# temporal arm to lock (§6.3 rationale: Opus's v2 cross_contamination=0.095
+# sets the upper-bound expectation for temporal performance — whether that
+# rate is materially higher under temporal noise determines whether the v2
+# cross-arm gap compresses or grows on a different axis).
+
+experiment:
+  # v3 hash = sha256(DESIGN + PROMPTS + RUBRIC + MULTI_VENDOR_ADDENDUM + TEMPORAL_NOISE_ADDENDUM).
+  pre_registration_hash: "10ebe9f1ea30d98fdf5453074867fee54c1e047b1463f692ac66d89a939a8043"
+
+arm:
+  name: opus-4-7-temporal
+  description: "Anthropic Opus 4.7 (max thinking) under temporal_msft noise. v3 second-priority arm."
+
+models:
+  analyst:
+    snapshot: "claude-opus-4-7"
+    context_window: 1000000
+    thinking_effort: "max"
+    max_output_tokens: 32768
+    temperature: 1.0
+
+design:
+  fill_levels: [0.00, 0.25, 0.50, 0.75, 0.95]
+  positions: [start, middle, end]
+  noise_types: [temporal_msft]
+  reports: [MSFT]
+  reps_per_cell: 7
+
+pilot:
+  cells:
+    - {report: MSFT, fill: 0.00, position: null, noise: null}
+    - {report: MSFT, fill: 0.50, position: middle, noise: temporal_msft}
+    - {report: MSFT, fill: 0.95, position: middle, noise: temporal_msft}
+
+# Cost-cap override (operational, not methodology-pinned).
+# Opus token rates are ~3.3× GPT-5.5; pilot ratio of actual/projected is
+# ~0.80×. Full-grid expectation = $987 × 0.80 ≈ $789, which exceeds the
+# default budget_usd ($700) and crowds the default hard_stop ($850).
+# Bumped to give a $200 safety margin for the full grid + any reruns.
+cost:
+  budget_usd: 850.0
+  hard_stop_usd: 1050.0

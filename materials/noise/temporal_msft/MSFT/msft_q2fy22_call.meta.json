@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q2fy22_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q2 FY2022 Earnings Call Transcript",
+  "period_label": "Q2 FY2022 earnings call",
+  "fiscal_year": 2022,
+  "fiscal_quarter": 2,
+  "sha256": "8a2e6417478dc0e95d438549f871fad2079ac3b4e62963daadd5aa7631875411",
+  "token_count": 16196,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://www.fool.com/earnings/call-transcripts/2022/01/26/microsoft-msft-q2-2022-earnings-call-transcript/\n# snapshot: https://web.archive.org/web/20220128000000id_/https://www.fool.com/earnings/call-transcripts/2022/01/26/microsoft-msft-q2-2022-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

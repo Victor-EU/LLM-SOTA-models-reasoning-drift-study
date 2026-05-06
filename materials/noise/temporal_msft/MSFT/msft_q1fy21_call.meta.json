@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q1fy21_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q1 FY2021 Earnings Call Transcript",
+  "period_label": "Q1 FY2021 earnings call",
+  "fiscal_year": 2021,
+  "fiscal_quarter": 1,
+  "sha256": "f109104c13dfe21a7448fa2338267209d2e30e5190ad0abfb2a42bff71294753",
+  "token_count": 14826,
+  "source_url": "https://news.alphastreet.com/microsoft-corp-msft-q1-2021-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

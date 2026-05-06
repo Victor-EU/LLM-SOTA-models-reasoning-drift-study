@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q2fy25_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q2 FY2025 Earnings Call Transcript",
+  "period_label": "Q2 FY2025 earnings call",
+  "fiscal_year": 2025,
+  "fiscal_quarter": 2,
+  "sha256": "a26bfc5913963a2ba9fb19eaac094396b5cfe7e8b54ee0268f0b3fa8c0fc362b",
+  "token_count": 16358,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://www.fool.com/earnings/call-transcripts/2025/01/29/microsoft-msft-q2-2025-earnings-call-transcript/\n# snapshot: https://web.archive.org/web/20250131000000id_/https://www.fool.com/earnings/call-transcripts/2025/01/29/microsoft-msft-q2-2025-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

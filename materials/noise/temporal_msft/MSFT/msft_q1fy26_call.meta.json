@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q1fy26_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q1 FY2026 Earnings Call Transcript",
+  "period_label": "Q1 FY2026 earnings call",
+  "fiscal_year": 2026,
+  "fiscal_quarter": 1,
+  "sha256": "6ad21a6f5009e3a0c8b6541a5f46165ee7cf01edd295eed680321c4cc8e2b1fe",
+  "token_count": 14756,
+  "source_url": "https://www.fool.com/earnings/call-transcripts/2025/10/29/microsoft-msft-q1-2026-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

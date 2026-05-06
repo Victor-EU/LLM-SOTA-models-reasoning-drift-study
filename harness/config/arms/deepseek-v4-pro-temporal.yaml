@@ -1,0 +1,55 @@
+# DeepSeek V4 Pro — temporal-noise variant (v3 methodology).
+#
+# Same analyst snapshot, thinking config, temperature, and max_output_tokens
+# as deepseek-v4-pro.yaml; only the noise type changes. v3 anticipated arm.
+#
+# Why deepseek-temporal: cheapest analyst in the v2 grid ($14 across 91
+# runs). Adds the only major non-US vendor to the v3 H6 evidence base.
+# DeepSeek's training mix and RLHF approach differ from US frontier labs;
+# whether the H6 null replicates here is informative about whether the
+# §4.2 disambiguation suffix is doing the work (training-invariant) or
+# the underlying model behavior is (vendor-invariant).
+
+experiment:
+  # v3 hash = sha256(DESIGN + PROMPTS + RUBRIC + MULTI_VENDOR_ADDENDUM + TEMPORAL_NOISE_ADDENDUM).
+  pre_registration_hash: "10ebe9f1ea30d98fdf5453074867fee54c1e047b1463f692ac66d89a939a8043"
+
+arm:
+  name: deepseek-v4-pro-temporal
+  description: "DeepSeek V4 Pro Preview with reasoning_effort=max under temporal_msft noise. v3 anticipated arm."
+
+models:
+  analyst:
+    vendor: deepseek
+    snapshot: "deepseek-v4-pro"
+    snapshot_note: |
+      DeepSeek V4 Pro Preview. Snapshot string is a mutable alias —
+      DeepSeek does not publish dated snapshot IDs. The harness logs
+      system_fingerprint returned per call into raw records as the
+      per-call build identifier. Wrapped via openai SDK against
+      api.deepseek.com (no first-party DeepSeek SDK). Raw chain-of-
+      thought exposed via reasoning_content field on the message.
+    context_window: 1000000
+    # MUST be null for non-Anthropic vendors (config validator enforces).
+    thinking_effort: null
+    thinking_config:
+      reasoning_effort: max
+    max_output_tokens: 128000
+    temperature: 1.0
+
+design:
+  fill_levels: [0.00, 0.25, 0.50, 0.75, 0.95]
+  positions: [start, middle, end]
+  noise_types: [temporal_msft]
+  reports: [MSFT]
+  reps_per_cell: 7
+
+pilot:
+  cells:
+    - {report: MSFT, fill: 0.00, position: null, noise: null}
+    - {report: MSFT, fill: 0.50, position: middle, noise: temporal_msft}
+    - {report: MSFT, fill: 0.95, position: middle, noise: temporal_msft}
+
+# Default base.yaml cost cap ($700/$850) is sufficient. DeepSeek analyst is
+# the cheapest in the v2 grid ($14 / 91 runs); v3 full-grid projection
+# (~$655) sits comfortably under the default hard_stop.

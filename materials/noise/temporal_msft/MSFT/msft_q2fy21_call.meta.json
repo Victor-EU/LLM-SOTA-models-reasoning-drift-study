@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q2fy21_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q2 FY2021 Earnings Call Transcript",
+  "period_label": "Q2 FY2021 earnings call",
+  "fiscal_year": 2021,
+  "fiscal_quarter": 2,
+  "sha256": "d75121648023190834c2c348b1b72a63fcd66a5929594c7c9fc0abd93f8187ab",
+  "token_count": 13214,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://www.fool.com/earnings/call-transcripts/2021/01/27/microsoft-msft-q2-2021-earnings-call-transcript/\n# snapshot: https://web.archive.org/web/20210128000000id_/https://www.fool.com/earnings/call-transcripts/2021/01/27/microsoft-msft-q2-2021-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_10q_fy2025_q3",
+  "noise_type": "temporal_msft",
+  "subpool": "10q",
+  "title": "Microsoft Corporation Form 10-Q Q3 FY2025",
+  "period_label": "Q3 FY2025",
+  "fiscal_year": 2025,
+  "fiscal_quarter": 3,
+  "sha256": "4b2041b439ac37082d5847497638d5d78e8d03ba6762194467d2d7850666bca7",
+  "token_count": 53058,
+  "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025061046/msft-20250331.htm",
+  "pair_target": "MSFT"
+}

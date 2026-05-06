@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q1fy24_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q1 FY2024 Earnings Call Transcript",
+  "period_label": "Q1 FY2024 earnings call",
+  "fiscal_year": 2024,
+  "fiscal_quarter": 1,
+  "sha256": "e7ad943f3c005ce3660d688a8bed20bd0f8e0e56291e9ccfb65429bcffe4f61d",
+  "token_count": 14782,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://news.alphastreet.com/microsoft-corporation-msft-q1-2024-earnings-call-transcript/\n# snapshot: https://web.archive.org/web/20231026145719id_/https://news.alphastreet.com/microsoft-corporation-msft-q1-2024-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

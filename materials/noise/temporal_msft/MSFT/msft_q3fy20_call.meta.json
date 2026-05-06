@@ -1,0 +1,13 @@
+{
+  "doc_id": "msft_q3fy20_call",
+  "noise_type": "temporal_msft",
+  "subpool": "earnings_call",
+  "title": "Microsoft Q3 FY2020 Earnings Call Transcript",
+  "period_label": "Q3 FY2020 earnings call",
+  "fiscal_year": 2020,
+  "fiscal_quarter": 3,
+  "sha256": "6b31ffaab63e86584323bd9d1ee03ee0a1657c57061262139029424647cf2cd8",
+  "token_count": 15630,
+  "source_url": "# Sourced via Wayback Machine snapshot:\n# original: https://news.alphastreet.com/microsoft-corp-nasdaq-msft-q3-2020-earnings-call-transcript/\n# snapshot: https://web.archive.org/web/20200617231440id_/https://news.alphastreet.com/microsoft-corp-nasdaq-msft-q3-2020-earnings-call-transcript/",
+  "pair_target": "MSFT"
+}

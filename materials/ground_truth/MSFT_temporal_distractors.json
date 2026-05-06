@@ -1,0 +1,160 @@
+{
+  "$schema_version": "0.2",
+  "$schema_note": "Per TEMPORAL_NOISE_ADDENDUM.md §5.1. For each Tier-1/Tier-2 ground-truth value V (FY2025 actual, in materials/ground_truth/MSFT.json), this file lists the SAME line item from each prior-period file in the temporal pool. Each entry is the 'wrong period' value a model could surface from temporal-noise context. Programmatic detection (autograder.py + judge: see harness/src/grading/scope_cap.py for the cap rule) increments temporal_contamination on each distinct hit.",
+  "$source_period_notation": "FY<YYYY> = annual fiscal year ending June 30. Q<n>_FY<YYYY> = the n-th quarter of that fiscal year. *_GUIDANCE = forward-looking management guidance midpoint (not actual). *_RESTATED = the value as restated in a SUBSEQUENT 10-K (per §3.1b restated-comparator wrinkle).",
+  "$origin": "Initial population (v0.2): high-confidence prior-period values for FY24/FY23 annuals derived from MSFT.json common_distractors_notes + the FY2023 and FY2024 10-Ks in the temporal pool. 10-Q quarterly values and Q1 FY2026 call values are author-extension points (TBD, populated as the noise-screening reviewer adds verified numbers from those files).",
+  "$peer_distractor_separation": "Peer distractors (cross-noise) live in materials/ground_truth/MSFT.json under common_distractors. This file is exclusively MSFT-prior-period (temporal-noise) distractors. The two are scored on parallel metrics: cross_contamination vs temporal_contamination. See addendum §5.1.",
+
+  "target_company": "MSFT",
+  "target_period": "FY2025",
+  "target_documents": [
+    "materials/target/MSFT/10k.txt (FY2025 10-K)",
+    "materials/target/MSFT/earnings_call.txt (Q2 FY2026 call)"
+  ],
+
+  "distractors": [
+    {
+      "q_id": "MSFT-F-01",
+      "line_item": "Total revenue (annual)",
+      "fy2025_actual_usd_m": 281724,
+      "tolerance_rel_for_match": 0.005,
+      "values": [
+        {
+          "period": "FY2024",
+          "source_doc": "msft_10k_fy2024.txt",
+          "value_usd_m": 245122,
+          "restatement_version": "as_originally_filed",
+          "notes": "FY24 annual total revenue. Closest temporal distractor by recency."
+        },
+        {
+          "period": "FY2023",
+          "source_doc": "msft_10k_fy2023.txt",
+          "value_usd_m": 211915,
+          "restatement_version": "as_originally_filed",
+          "notes": "FY23 annual total revenue."
+        },
+        {
+          "period": "FY2024_RESTATED",
+          "source_doc": "(FY2025 10-K target — restated comparator)",
+          "value_usd_m": 245122,
+          "restatement_version": "as_restated_in_fy25_10k",
+          "notes": "Per §3.1b — same value as 'as originally filed' for FY24 total revenue (no segment reorg between filings). Listed for completeness; both versions count as one distractor."
+        }
+      ]
+    },
+    {
+      "q_id": "MSFT-F-02",
+      "line_item": "Operating income (annual)",
+      "fy2025_actual_usd_m": 128528,
+      "tolerance_rel_for_match": 0.005,
+      "values": [
+        {
+          "period": "FY2024",
+          "source_doc": "msft_10k_fy2024.txt",
+          "value_usd_m": 109433,
+          "restatement_version": "as_originally_filed",
+          "notes": "FY24 operating income (per MSFT.json:F-02 distractor notes)."
+        },
+        {
+          "period": "FY2023",
+          "source_doc": "msft_10k_fy2023.txt",
+          "value_usd_m": 88523,
+          "restatement_version": "as_originally_filed",
+          "notes": "FY23 operating income."
+        }
+      ]
+    },
+    {
+      "q_id": "MSFT-F-03",
+      "line_item": "Diluted EPS (annual)",
+      "fy2025_actual_usd_per_share": 13.64,
+      "tolerance_abs_for_match": 0.02,
+      "values": [
+        {
+          "period": "FY2024",
+          "source_doc": "msft_10k_fy2024.txt",
+          "value_usd_per_share": 11.80,
+          "restatement_version": "as_originally_filed",
+          "notes": "FY24 diluted EPS."
+        },
+        {
+          "period": "FY2024_BASIC",
+          "source_doc": "msft_10k_fy2024.txt",
+          "value_usd_per_share": 11.86,
+          "restatement_version": "as_originally_filed",
+          "notes": "FY24 BASIC EPS — common 'diluted vs basic' confusion."
+        },
+        {
+          "period": "FY2023",
+          "source_doc": "msft_10k_fy2023.txt",
+          "value_usd_per_share": 9.68,
+          "restatement_version": "as_originally_filed",
+          "notes": "FY23 diluted EPS."
+        },
+        {
+          "period": "FY2023_BASIC",
+          "source_doc": "msft_10k_fy2023.txt",
+          "value_usd_per_share": 9.72,
+          "restatement_version": "as_originally_filed",
+          "notes": "FY23 basic EPS."
+        }
+      ]
+    },
+    {
+      "q_id": "MSFT-C-01",
+      "line_item": "Effective tax rate (annual)",
+      "fy2025_actual_percent": 17.6,
+      "tolerance_abs_for_match": 0.2,
+      "values": [
+        {
+          "period": "FY2024",
+          "source_doc": "msft_10k_fy2024.txt",
+          "value_percent": 18.2,
+          "restatement_version": "as_originally_filed",
+          "notes": "FY24 effective tax rate (19,651 / 107,787 per MSFT.json:C-01 distractor notes)."
+        },
+        {
+          "period": "Q3_FY2026_GUIDANCE",
+          "source_doc": "(target Q2 FY2026 earnings call — forward-guidance reference)",
+          "value_percent": 19.0,
+          "restatement_version": "guidance_midpoint",
+          "notes": "Q3 FY26 adjusted tax rate disclosed in earnings call. Forward-looking; flagged per §3.3.1 as a guidance-midpoint failure mode."
+        }
+      ]
+    },
+    {
+      "q_id": "MSFT-C-02",
+      "line_item": "Total revenue YoY growth percent (annual)",
+      "fy2025_actual_percent": 14.9,
+      "tolerance_abs_for_match": 0.2,
+      "values": [
+        {
+          "period": "FY2024_OVER_FY2023",
+          "source_doc": "msft_10k_fy2024.txt",
+          "value_percent": 15.67,
+          "restatement_version": "computed",
+          "notes": "(245122 - 211915) / 211915 * 100 — FY23->FY24 growth, computable from prior 10-Ks. Outside ±0.2 abs band of 14.9 but within fuzzy recall."
+        },
+        {
+          "period": "FY2023_OVER_FY2022",
+          "source_doc": "msft_10k_fy2023.txt",
+          "value_percent": 6.88,
+          "restatement_version": "computed",
+          "notes": "FY22->FY23 growth — distinguishable but listed for diagnostic completeness."
+        }
+      ]
+    }
+  ],
+
+  "open_extensions": [
+    "Quarterly revenues from 9 prior 10-Qs (FY25 Q1/Q2/Q3, FY24 Q1/Q2/Q3, FY23 Q1/Q2/Q3) for F-01 line item. Likely high-density distractors per §3.1 — quarterly revenues sit numerically close to (annual / 4).",
+    "Quarterly operating income from same 10-Qs for F-02 line item.",
+    "Per-call quarterly diluted EPS from the 23 prior earnings-call transcripts for F-03 line item.",
+    "Effective tax rate as disclosed in each prior-period 10-Q (typically lower precision than annuals)."
+  ],
+
+  "$last_modified": "2026-05-05",
+  "$last_modified_by": "Victor Zhang <victor.zhang.eu@gmail.com>",
+  "$populated_for_pilot": true,
+  "$pilot_population_note": "v0.2 covers the high-confidence FY24/FY23 annual values verified against MSFT.json common_distractors_notes. Quarterly distractors from 10-Qs are open extension points; absence in this list does NOT mean the noise file lacks the value — it means the value isn't yet in the programmatic-detection set. Pilot will surface whether the missing entries materially undercount temporal_contamination."
+}
